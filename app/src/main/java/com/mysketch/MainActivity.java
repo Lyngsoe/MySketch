@@ -20,8 +20,8 @@ public class MainActivity extends AppCompatActivity {
     final Button newProject = (Button) findViewById(R.id.btn_new);
         newProject.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(getBaseContext(), SetupProject.class);
-                startActivity(intent);
+                Intent choose = new Intent(getBaseContext(), SetupProject.class);
+                startActivity(choose);
             }
         });
     }

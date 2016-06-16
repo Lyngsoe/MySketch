@@ -10,9 +10,9 @@
         android:text="Choose project settings"
         android:id="@+id/textView2"
         android:textStyle="bold"
-        android:layout_marginTop="48dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_above="@+id/setHeight"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="43dp" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -20,23 +20,23 @@
         android:layout_height="wrap_content"
         android:text="Apply"
         android:id="@+id/btn_go"
-        android:layout_marginBottom="87dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/setWidth"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="27dp" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
-        android:imeOptions="actionNext"
         android:id="@+id/setHeight"
         android:autoText="false"
         android:text="height(meter)"
         android:textAlignment="center"
         android:textColor="@color/accent_material_dark"
-        android:layout_centerVertical="true"
-        android:layout_alignStart="@+id/setWidth" />
+        android:clickable="true"
+        android:layout_alignTop="@+id/setWidth"
+        android:layout_toEndOf="@+id/btn_go" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -46,10 +46,9 @@
         android:id="@+id/setWidth"
         android:autoText="false"
         android:text="width(meter)"
-        android:imeOptions="actionDone"
         android:textAlignment="center"
         android:textColor="@color/accent_material_dark"
-        android:layout_above="@+id/btn_go"
-        android:layout_alignEnd="@+id/textView2" />
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/btn_go" />
 
 </RelativeLayout>
