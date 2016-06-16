@@ -23,10 +23,6 @@ public class Loading extends Activity {
         setContentView(R.layout.loading);
         final ImageView imageView = (ImageView) findViewById(R.id.imageView);
 
-        Resources res = getBaseContext().getResources();
-        int id = R.drawable.logo3;
-        Bitmap b = BitmapFactory.decodeResource(res, id);
-
         final Animation animation = AnimationUtils.loadAnimation(getBaseContext(), R.anim.rotate);
         final Animation endAnimation = AnimationUtils.loadAnimation(getBaseContext(), R.anim.abc_fade_out);
 
