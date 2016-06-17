@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     final Button newProject = (Button) findViewById(R.id.btn_new);
         newProject.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(getBaseContext(), SetupProject.class);
+                Intent intent = new Intent(getBaseContext(), SketchActivity.class);
                 startActivity(intent);
             }
         });
