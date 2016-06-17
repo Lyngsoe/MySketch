@@ -12,27 +12,28 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 
+import com.example.benjamin.git.MySketch.R;
 
 
-public class SurfaceView extends android.view.SurfaceView {
+public class MySurfaceView extends android.view.SurfaceView {
 
     private SurfaceHolder surfaceHolder;
     private Bitmap bmpIcon;
 
-    public SurfaceView(Context context) {
+    public MySurfaceView(Context context) {
         super(context);
         init();
 
     }
 
-    public SurfaceView(Context context,
-                       AttributeSet attrs) {
+    public MySurfaceView(Context context,
+                         AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public SurfaceView(Context context,
-                       AttributeSet attrs, int defStyle) {
+    public MySurfaceView(Context context,
+                         AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
     }
