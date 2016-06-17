@@ -27,6 +27,16 @@
             </intent-filter>
 
         </activity>
+
+        <activity android:name="com.mysketch.SetupProject"
+           android:theme="@style/AppTheme.CustomTheme"
+        ></activity>
+
+        <activity android:name="com.mysketch.TempSketch"
+            android:theme="@style/AppTheme.CustomTheme"
+            ></activity>
+
+
     </application>
 
 </manifest>
