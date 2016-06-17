@@ -17,14 +17,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button bt1 = (Button) findViewById(R.id.button);
-        bt1.setOnClickListener(new Button.OnClickListener(){
-            public void onClick(View v){
-                Intent NI = new Intent(MainActivity.this,SketchDrawing.class);
-                startActivity(NI);
+    final Button newProject = (Button) findViewById(R.id.btn_new);
+        newProject.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent choose = new Intent(getBaseContext(), SketchActivity.class);
+                startActivity(choose);
             }
         });
-
     }
-
 }

@@ -16,12 +16,9 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
-
         </activity>
 
-        <activity android:name="com.mysketch.Loading"
-                    >
+        <activity android:name="com.mysketch.Loading">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,16 +28,14 @@
 
         </activity>
 
-        <activity android:name="com.mysketch.SketchDrawing"
-            >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <activity android:name="com.mysketch.SetupProject"
+           android:theme="@style/AppTheme.CustomTheme"
+        ></activity>
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+        <activity android:name="com.mysketch.TempSketch"
+            android:theme="@style/AppTheme.CustomTheme"
+            ></activity>
 
-            </intent-filter>
-
-        </activity>
 
     </application>
 
