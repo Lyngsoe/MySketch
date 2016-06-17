@@ -16,7 +16,7 @@ public class Shapes extends View {
 
     public boolean Intersects(float x, float y){return false;}
 
-    public void setCoord(float x, float y){}
+    public void setDraw(float x, float y){}
 
     public float getXCoord(){return -1.0f;}
 

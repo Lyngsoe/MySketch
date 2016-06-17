@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.app.*;
 import android.os.*;
@@ -47,11 +48,13 @@ public class SketchActivity extends Activity{
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        mDisplayHeight = size.x;
-        mDisplayWidth = size.y;
+        mDisplayHeight = size.y;
+        mDisplayWidth = size.x;
         screenPos = new PointF(0,0);
         gestureListener = new GestureDetectorCompat(this, new MyGestureListener());
-        mFrame.addView(new Sqaure(this,100,100));
+        mFrame.addView(new Circle(this,100,100,200));
+        mFrame.addView(new Square(this,100,100,100,100));
+        mFrame.addView(new Square(this,50,50,50,50));
 
 
         new Thread(new Runnable() {
@@ -61,23 +64,22 @@ public class SketchActivity extends Activity{
             @Override
             public void run() {
                 Log.i(TAG,"thread called");
-                float XScreen = screenPos.x;
-                float YScreen = screenPos.y;
+                //float XScreen = screenPos.x;
+                //float YScreen = screenPos.y;
                 for(int i = 0; i < mFrame.getChildCount();i++){
                     View currentView = mFrame.getChildAt(i);
-                    float XView = currentView.getX();
-                    float YView = currentView.getY();
+                    //float XView = currentView.getX();
+                    //float YView = currentView.getY();
                     Log.i(TAG,"entered loop");
-                    if(XView <= XScreen+mDisplayWidth && XView >= XScreen){
-                        if(YView <= YScreen+mDisplayHeight && YView >= YScreen){
-                            Log.i(TAG,"invalidate called");
-                            ((Sqaure) currentView).setDrawX(screenPos.x);
-                            ((Sqaure) currentView).setDrawY(screenPos.y);
+                //    if(XView <= XScreen+mDisplayWidth && XView >= XScreen){
+                  //      if(YView <= YScreen+mDisplayHeight && YView >= YScreen){
+                    //        Log.i(TAG,"invalidate called");
+                            ((Shapes) currentView).setDraw(screenPos.x,screenPos.y);
                             currentView.invalidate();
 
                         }
-                    }
-                }
+
+
                 handler.postDelayed(this,1); // set time here to refresh
             }
         });

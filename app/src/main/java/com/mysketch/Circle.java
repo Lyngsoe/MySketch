@@ -9,50 +9,46 @@ import android.view.View;
 /**
  * Created by Sean on 16-06-2016.
  */
-public class Circle extends View {
+public class Circle extends Shapes {
+
+    final String TAG = "Square";
+    private final Paint mPainter = new Paint();
+    float x;
+    float y;
+    float drawX,drawY;
+    float radius;
 
 
-    private Paint paint = new Paint();
-    private float R;
-    private float posX;
-    private float posY;
-
-
-    public Circle(Context context, float R, float posX, float posY){
+    public Circle(Context context, float x, float y, float radius){
         super(context);
-        paint.setColor(Color.BLACK);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setAntiAlias(true);
-        paint.setStrokeWidth(4.0f);
-        this.R = R;
-        this.posX=posX;
-        this.posY=posY;
-
-        invalidate();
-
+        mPainter.setStyle(Paint.Style.STROKE);
+        mPainter.setStrokeWidth(4.5f);
+        this.x = x;
+        this.y = y;
+        this.radius=radius;
 
     }
-
-
     @Override
-    public void onDraw(Canvas canvas){
+    protected synchronized void onDraw(Canvas canvas) {
 
-
-
+        // TODO - save the canvas
         canvas.save();
-       // canvas.drawLine(0,0,150,150,paint);
-        canvas.drawCircle(posX,posY,R,paint);
-       // canvas.drawLine(150,0,0,150,paint);
-        //canvas.drawLine(200,500,400,500,paint);
-       // mcanvas = new Canvas(Bitmap.createBitmap(h,w, Bitmap.Config.ARGB_8888));
-        // mcanvas.drawColor(Color.BLACK);
+        // TODO - draw at its new location
+        canvas.drawCircle(x-drawX,y-drawY,radius,mPainter);
+        //canvas.drawCircle(x-getTranslationX(),y-getTranslationY(),100,mPainter);
 
-
-
+        // TODO - restore the canvas
         canvas.restore();
     }
 
-    public void clicksOnsquare(){
-
+    public void setCoord(float x, float y){
+        this.x = x;
+        this.y = y;
     }
+
+    public void setDraw(float x, float y){
+        this.drawX=x;
+        this.drawY=y;
+    }
+
 }

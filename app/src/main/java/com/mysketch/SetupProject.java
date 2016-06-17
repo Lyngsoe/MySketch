@@ -62,12 +62,12 @@ public class SetupProject extends Activity {
 
                     dimensions.setDimensions(Integer.parseInt(h), Integer.parseInt(w));
 
-                    Intent sketch = new Intent(getBaseContext(), TempSketch.class);
+                   // Intent sketch = new Intent(getBaseContext(), TempSketch.class);
                     Bundle data = new Bundle();
                     ArrayList<Integer> temp = dimensions.getDimensions();
                     data.putIntegerArrayList("Dimensions", temp);
-                    sketch.putExtra("Dimensions", data);
-                    startActivity(sketch);
+                  //  sketch.putExtra("Dimensions", data);
+                   // startActivity(sketch);
                 }
             }
         });

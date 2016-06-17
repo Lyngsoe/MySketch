@@ -17,18 +17,19 @@ public class Square extends Shapes {
 
     private Paint paint = new Paint();
     private float h,w;
-    private float posX = 100;
-    private float posY = 100;
-    private GestureDetector mDetector;
+    private float x,y = 100;
+    private float drawX;
+    private float drawY;
 
-    public  Square(Context context, float w, float h){
+    public  Square(Context context, float w, float h, float x, float y){
         super(context);
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
         paint.setAntiAlias(true);
-        paint.setStrokeWidth(4.0f);
+        paint.setStrokeWidth(4.5f);
         this.h = h;
         this.w = w;
+
         invalidate();
 
 
@@ -42,16 +43,21 @@ public class Square extends Shapes {
     }
 
     public void setCoord(float x, float y){
-        this.posX = x;
-        this.posY = y;
+        this.x = x;
+        this.y = y;
+    }
+
+    public void setDraw(float x, float y){
+        this.drawX=x;
+        this.drawY=y;
     }
 
     public float getXCoord(){
-        return posX;
+        return drawX;
     }
 
     public float getYCoord(){
-        return posY;
+        return drawY;
     }
 
 
@@ -62,18 +68,11 @@ public class Square extends Shapes {
 
 
         canvas.save();
-       // canvas.drawLine(0,0,150,150,paint);
 
-        canvas.drawLine(posX,posY,posX+w,posY,paint);
-        canvas.drawLine(posX,posY,posX,posY+h,paint);
-        canvas.drawLine(posX+w,posY+h,posX,posY+h,paint);
-        canvas.drawLine(posX+w,posY+h,posX+w,posY,paint);
-       // canvas.drawLine(150,0,0,150,paint);
-        //canvas.drawLine(200,500,400,500,paint);
-       // mcanvas = new Canvas(Bitmap.createBitmap(h,w, Bitmap.Config.ARGB_8888));
-        // mcanvas.drawColor(Color.BLACK);
-
-
+        canvas.drawLine(x-drawX,y-drawY,x-drawX+w,y-drawY,paint);
+        canvas.drawLine(x-drawX,y-drawY,x-drawX,y-drawY+h,paint);
+        canvas.drawLine(x-drawX+w,y-drawY+h,x-drawX,y-drawY+h,paint);
+        canvas.drawLine(x-drawX+w,y-drawY+h,x-drawX+w,y-drawY,paint);
 
         canvas.restore();
     }
