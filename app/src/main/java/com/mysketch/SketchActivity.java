@@ -1,42 +1,35 @@
 package com.mysketch;
 
-import android.content.Context;
 import android.app.Activity;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.RectF;
-import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
-import android.app.*;
-import android.os.*;
-import android.accessibilityservice.*;
+import android.os.Handler;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
-import android.view.*;
-import android.gesture.*;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.util.AttributeSet;
-import android.util.Log;
+import android.view.Display;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
-
 
 import com.example.benjamin.git.MySketch.R;
+
+import java.util.ArrayList;
 
 public class SketchActivity extends Activity{
     private static final String DEBUG_GESTURE_TAG = "Gestures";
     private static final String ACTIVITY_TAG = "SketchActivity";
     private static final String TOUCH_TAG = "TouchEvents";
 
+    private static final String KEY_PROJECT_NAME = "projectName_key";
+
     RelativeLayout mFrame;
 
-
+    String mCurrentProject;
+    ArrayList<Shapes> shapesList = new ArrayList<>();
 
     int mDisplayHeight;
     int mDisplayWidth;
@@ -77,9 +70,17 @@ public class SketchActivity extends Activity{
         gestureListener = new GestureDetectorCompat(this, new MyGestureListener());
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
-        mFrame.addView(new Circle(this,100,100,200));
-        mFrame.addView(new Square(this,100,100,100,100));
-        mFrame.addView(new Square(this,50,50,50,50));
+        //Indstiller project der arbejdes med
+        mCurrentProject = getIntent().getStringExtra(MainActivity.PROJECT_NAME_KEY);
+
+        //Loader filer gemt under projectet
+        loadSavedData();
+
+        //Test
+        new Circle(this, mCurrentProject, true, 100,100,200);
+        new Square(this, mCurrentProject, true, 100,100,100,100);
+        new Square(this, mCurrentProject, true, 50,50,50,50);
+
 
 
         new Thread(new Runnable() {
@@ -108,20 +109,63 @@ public class SketchActivity extends Activity{
     @Override
     public void onResume() {
         super.onResume();
+        loadSavedData();
         isRunning = true;
     }
 
     @Override
     public void onPause() {
-        super.onPause();
+        saveData();
         isRunning = false;
+        super.onPause();
     }
+
+    @Override
+    protected void onDestroy() {
+        saveData();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putString(KEY_PROJECT_NAME, mCurrentProject);
+        saveData();
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        mCurrentProject = savedInstanceState.getString(KEY_PROJECT_NAME);
+        loadSavedData();
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    //Gemmer alle shapes der arbejdes på i det nuværende projectet
+    private void saveData(){
+        Log.e("DataManager", shapesList.get(0).getX()+"  "+shapesList.get(1).drawY);
+        DataManager.saveAndOverwriteAllShapes(shapesList.toArray(new Shapes[shapesList.size()]));
+    }
+
+    //loader alle shapes for det nuværende project.
+    private void loadSavedData(){
+        shapesList = new ArrayList<>();
+        Shapes[] loadShapes = DataManager.loadAllShapes(getApplicationContext(), mCurrentProject, false, false);
+        if(loadShapes != null && loadShapes.length>0){
+            for(Shapes shape : loadShapes){
+                shapesList.add(shape);
+                mFrame.addView(shape);
+            }
+        }
+        Log.e("DataManager", shapesList.get(0).getX()+"  "+shapesList.get(1).drawY);
+    }
+
     private void midPoint(PointF point, MotionEvent event) {
         // finder midtpunktet mellem to touches
         float x = event.getX(0) + event.getX(1);
         float y = event.getY(0) + event.getY(1);
         point.set(x / 2, y / 2);
     }
+
     public boolean onTouchEvent(MotionEvent event){
         boolean retVal = mScaleGestureDetector.onTouchEvent(event);
         retVal = gestureListener.onTouchEvent(event) || retVal;
@@ -146,7 +190,6 @@ public class SketchActivity extends Activity{
 
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
 
-
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (!mScaleGestureDetector.isInProgress()) {
@@ -164,6 +207,7 @@ public class SketchActivity extends Activity{
         }
 
     }
+
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
