@@ -18,15 +18,13 @@ public class Square extends Shapes {
     float h,w;
 
     public  Square(Context context, String projectName, boolean addInstance, float w, float h, float x, float y){
-        super(context, projectName, SHAPE_TYPE, addInstance);
+        super(context, projectName, SHAPE_TYPE, addInstance, x, y);
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
         paint.setAntiAlias(true);
         paint.setStrokeWidth(4.5f);
         this.h = h;
         this.w = w;
-        this.x = x;
-        this.y = y;
 
         if(addInstance){
             DataManager.saveAndOverwriteSingleShape(this);

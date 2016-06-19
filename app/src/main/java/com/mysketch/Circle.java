@@ -18,12 +18,10 @@ public class Circle extends Shapes {
 
 
     public Circle(Context context, String projectName, boolean addInstance, float x, float y, float radius){
-        super(context, projectName, SHAPE_TYPE, addInstance);
+        super(context, projectName, SHAPE_TYPE, addInstance, x, y);
         mPainter.setStyle(Paint.Style.STROKE);
         mPainter.setStrokeWidth(4.5f);
         this.radius=radius;
-        this.x = x;
-        this.y = y;
 
         if(addInstance){
             DataManager.saveAndOverwriteSingleShape(this);
