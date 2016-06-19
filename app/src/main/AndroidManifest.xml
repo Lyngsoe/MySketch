@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.benjamin.git.MySketch">
 
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -15,6 +16,7 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
+
             </intent-filter>
         </activity>
 
@@ -25,7 +27,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
 
             </intent-filter>
-
         </activity>
 
         <activity android:name="com.mysketch.SketchActivity">
@@ -35,16 +36,12 @@
                 <category android:name="android.intent.category.DEFAULT"/>
 
             </intent-filter>
-
         </activity>
 
         <activity android:name="com.mysketch.SetupProject"
-           android:theme="@style/AppTheme.CustomTheme"
-        ></activity>
+           android:theme="@style/AppTheme.CustomTheme" >
 
-        <activity android:name="com.mysketch.TempSketch"
-            android:theme="@style/AppTheme.CustomTheme"
-            ></activity>
+        </activity>
 
 
     </application>
