@@ -22,7 +22,6 @@ import java.util.ArrayList;
  * - Create/load/delete/rename projects.
  * - Dynamically save/load shapes for a given project into files.
  * - Export to PDF file in common 'Downloads' folder. @TODO
- * - Store settings and other variables for a project. @TODO
  *
  *
  * Requirements:
@@ -44,7 +43,6 @@ public class DataManager {
     static String DOWNLIOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     static String DIR = Environment.getExternalStorageDirectory().getAbsolutePath()+"/MySketch/Saves/";
     static final String FILE_TYPE = ".shape";
-    static final String SETTINGS_TYPE = ".settings";
 
     //Used when choosing with project to open / delete
     public static String[] getAllNamesOfProjects(){
@@ -194,7 +192,7 @@ public class DataManager {
         if(wrappers != null && wrappers.length > 0){
             Shapes[] shapes = new Shapes[wrappers.length];
             for(int i = 0; i < wrappers.length; i++){
-                shapes[i] = convertShapeWrapper(context, wrappers[i], instance);
+                shapes[i] = wrappers[i].convert(context, instance);
             }
             return shapes;
         }
@@ -253,38 +251,6 @@ public class DataManager {
         return null;
     }
 
-    private static Shapes convertShapeWrapper(Context context, ShapeWrapper input, boolean instance){
-        Shapes output;
-        switch(input.shapeType){
-            case "CIRCLE":{
-                output = new Circle(context, input.projectName, instance, input.x, input.y, input.radius);
-                break;
-            }
-            case "SQUARE":{
-                output = new Square(context, input.projectName, instance, input.w, input.h, input.x, input.y);
-                break;
-            }
-            default: return null;
-        }
-        output.projectName = input.projectName;
-        output.uniqueID = input.uniqueID;
-        output.shapeType = input.shapeType;
-        output.drawX = input.drawX;
-        output.drawY = input.drawY;
-        output.x = input.x;
-        output.y = input.y;
-
-        /*
-        Log.i("save", output.shapeType+" : load");
-        Log.i("save", output.drawX+" : load");
-        Log.i("save", output.drawY+" : load");
-        Log.i("save", output.x+" : load");
-        Log.i("save", output.y+" : load");
-        */
-
-        return output;
-    }
-
     //when object is deleted, the corresponding file should also be deleted.
     @SuppressWarnings("unused")
     public static boolean deleteSingleShape(Shapes source){
@@ -334,8 +300,8 @@ public class DataManager {
         return i;
     }
 
-
-    public static class ShapeWrapper implements Serializable {
+    private static class ShapeWrapper implements Serializable {
+        //Shapes
         String projectName;
         int uniqueID;
         String shapeType;
@@ -376,6 +342,38 @@ public class DataManager {
             }
 
             return this;
+        }
+
+        Shapes convert(Context context, boolean instance){
+            Shapes output;
+            switch(this.shapeType){
+                case "CIRCLE":{
+                    output = new Circle(context, this.projectName, instance, this.x, this.y, this.radius);
+                    break;
+                }
+                case "SQUARE":{
+                    output = new Square(context, this.projectName, instance, this.w, this.h, this.x, this.y);
+                    break;
+                }
+                default: return null;
+            }
+            output.projectName = this.projectName;
+            output.uniqueID = this.uniqueID;
+            output.shapeType = this.shapeType;
+            output.drawX = this.drawX;
+            output.drawY = this.drawY;
+            output.x = this.x;
+            output.y = this.y;
+
+            /*
+            Log.i("save", output.shapeType+" : load");
+            Log.i("save", output.drawX+" : load");
+            Log.i("save", output.drawY+" : load");
+            Log.i("save", output.x+" : load");
+            Log.i("save", output.y+" : load");
+            */
+
+            return output;
         }
     }
 }
