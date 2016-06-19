@@ -34,6 +34,7 @@ public class Circle extends Shapes {
         // TODO - save the canvas
         canvas.save();
         // TODO - draw at its new location
+        canvas.scale(mScaleFactor, mScaleFactor,zoomPoint.x,zoomPoint.y);
         canvas.drawCircle(x-drawX,y-drawY,radius,mPainter);
         //canvas.drawCircle(x-getTranslationX(),y-getTranslationY(),100,mPainter);
 
