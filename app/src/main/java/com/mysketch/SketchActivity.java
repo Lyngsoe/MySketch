@@ -142,7 +142,6 @@ public class SketchActivity extends Activity{
 
     //Gemmer alle shapes der arbejdes på i det nuværende projectet
     private void saveData(){
-        Log.e("DataManager", shapesList.get(0).getX()+"  "+shapesList.get(1).drawY);
         DataManager.saveAndOverwriteAllShapes(shapesList.toArray(new Shapes[shapesList.size()]));
     }
 
@@ -156,7 +155,6 @@ public class SketchActivity extends Activity{
                 mFrame.addView(shape);
             }
         }
-        Log.e("DataManager", shapesList.get(0).getX()+"  "+shapesList.get(1).drawY);
     }
 
     private void midPoint(PointF point, MotionEvent event) {
