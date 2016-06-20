@@ -221,6 +221,12 @@ public class SketchActivity extends Activity{
         float tx = v[Matrix.MTRANS_X];
         float ty = v[Matrix.MTRANS_Y];
 
+        float scalex = v[Matrix.MSCALE_X];
+        float scaley = v[Matrix.MSCALE_Y];
+        float scale = (float) Math.hypot(scalex, scaley);
+        tx *= scale;
+        ty *= scale;
+
         for(Shapes shape : shapesList){
             if(shape.Intersects(x-tx, y-ty)){
                 return shape;
