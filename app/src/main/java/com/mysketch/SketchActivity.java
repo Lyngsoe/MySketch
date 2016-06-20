@@ -36,7 +36,6 @@ public class SketchActivity extends Activity{
     int mDisplayWidth;
     GestureDetectorCompat gestureListener;
     ScaleGestureDetector mScaleGestureDetector;
-    final Handler handler=new Handler();
     float meter;
     PointF screenPos = new PointF(0,0);
     float mScaleFactor = 1;
@@ -44,7 +43,6 @@ public class SketchActivity extends Activity{
     float lastTouchX;
     float lastTouchY;
     Matrix m;
-    PointF mid = new PointF();
 
 
 
@@ -81,27 +79,6 @@ public class SketchActivity extends Activity{
         new Circle(this, mCurrentProject, true, 100,100,200);
         new Square(this, mCurrentProject, true, 100,100,100,100);
         new Square(this, mCurrentProject, true, 50,50,50,50);
-
-
-
-        new Thread(new Runnable() {
-            @Override
-            public void run () {
-        handler.post(new Runnable(){
-            @Override
-            public void run() {
-                if (isRunning) {
-                    for (int i = 0; i < mFrame.getChildCount(); i++) {
-                        View currentView = mFrame.getChildAt(i);
-                        ((Shapes) currentView).setMatrix(m);
-                        currentView.invalidate();
-                    }
-                }
-
-                handler.postDelayed(this, 1); //tid mellem grafikKald
-            }
-        });}
-        });
 
     }
 
@@ -169,19 +146,11 @@ public class SketchActivity extends Activity{
             }
             case MotionEvent.ACTION_POINTER_DOWN:
                 Log.i(TOUCH_TAG,"Action_Pointer down!");
-                midPoint(mid,event);
                 break;
         }
 
-
         return retVal || super.onTouchEvent(event);
     }
-    private void midPoint(PointF point, MotionEvent event) {
-        float x = event.getX(0) + event.getX(1);
-        float y = event.getY(0) + event.getY(1);
-        point.set(x / 2, y / 2);
-    }
-
 
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
 
@@ -189,9 +158,6 @@ public class SketchActivity extends Activity{
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (!mScaleGestureDetector.isInProgress()) {
                 Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
-
-                //Rykker skærmen
-                //screenPos.offset(distanceX, distanceY);
 
                 m.postTranslate(-distanceX,-distanceY);
                 for (int i = 0; i < mFrame.getChildCount(); i++) {
@@ -225,15 +191,9 @@ public class SketchActivity extends Activity{
             String scale = mScaleFactor+ " ";
             Log.i(DEBUG_GESTURE_TAG,scale);
 
-            //Zoom focus is where the fingers are centered,
-
-
             //Sætter Scalefactor
             mScaleFactor *= detector.getScaleFactor();
             mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
-
-
-
 
             transformationMatrix.postTranslate(-focusX, -focusY);
             transformationMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor());
@@ -249,8 +209,6 @@ public class SketchActivity extends Activity{
 
             for (int i = 0; i < mFrame.getChildCount(); i++) {
                 View currentView = mFrame.getChildAt(i);
-                //((Shapes) currentView).setZoomPoint(mid);
-                //((Shapes) currentView).setScale(mScaleFactor);
                 ((Shapes) currentView).setMatrix(m);
                 currentView.invalidate();
             }
