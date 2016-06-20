@@ -1,6 +1,7 @@
 package com.mysketch;
 
 import android.app.Activity;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -42,6 +43,8 @@ public class SketchActivity extends Activity{
     boolean isRunning = false;
     float lastTouchX;
     float lastTouchY;
+    Matrix m;
+    PointF mid = new PointF();
 
 
 
@@ -62,6 +65,8 @@ public class SketchActivity extends Activity{
 
         //definition på meter
         meter = mDisplayHeight/3;
+        m = new Matrix();
+        m.reset();
 
         gestureListener = new GestureDetectorCompat(this, new MyGestureListener());
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
@@ -88,8 +93,7 @@ public class SketchActivity extends Activity{
                 if (isRunning) {
                     for (int i = 0; i < mFrame.getChildCount(); i++) {
                         View currentView = mFrame.getChildAt(i);
-                        ((Shapes) currentView).setDraw(screenPos.x, screenPos.y); //offset position
-                        ((Shapes) currentView).setScale(mScaleFactor); //Zoom faktor
+                        ((Shapes) currentView).setMatrix(m);
                         currentView.invalidate();
                     }
                 }
@@ -97,7 +101,7 @@ public class SketchActivity extends Activity{
                 handler.postDelayed(this, 1); //tid mellem grafikKald
             }
         });}
-        }).start();
+        });
 
     }
 
@@ -165,12 +169,19 @@ public class SketchActivity extends Activity{
             }
             case MotionEvent.ACTION_POINTER_DOWN:
                 Log.i(TOUCH_TAG,"Action_Pointer down!");
+                midPoint(mid,event);
                 break;
         }
 
 
         return retVal || super.onTouchEvent(event);
     }
+    private void midPoint(PointF point, MotionEvent event) {
+        float x = event.getX(0) + event.getX(1);
+        float y = event.getY(0) + event.getY(1);
+        point.set(x / 2, y / 2);
+    }
+
 
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
 
@@ -180,8 +191,14 @@ public class SketchActivity extends Activity{
                 Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
 
                 //Rykker skærmen
-                screenPos.offset(distanceX, distanceY);
+                //screenPos.offset(distanceX, distanceY);
 
+                m.postTranslate(-distanceX,-distanceY);
+                for (int i = 0; i < mFrame.getChildCount(); i++) {
+                    View currentView = mFrame.getChildAt(i);
+                    ((Shapes) currentView).setMatrix(m);
+                    currentView.invalidate();
+                }
 
                 String pos = (int) screenPos.x + " " + (int) screenPos.y;
                 Log.i(DEBUG_GESTURE_TAG, pos);
@@ -195,18 +212,20 @@ public class SketchActivity extends Activity{
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-           lastTouchX = detector.getFocusX();
+            lastTouchX = detector.getFocusX();
             lastTouchY = detector.getFocusY();
             return true;
         }
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            float newX = detector.getFocusX();
-            float newY = detector.getFocusY();
+            Matrix transformationMatrix = new Matrix();
+            float focusX = detector.getFocusX();
+            float focusY = detector.getFocusY();
             Log.i(DEBUG_GESTURE_TAG,"entered onScale");
             String scale = mScaleFactor+ " ";
             Log.i(DEBUG_GESTURE_TAG,scale);
 
+            //Zoom focus is where the fingers are centered,
 
 
             //Sætter Scalefactor
@@ -214,13 +233,27 @@ public class SketchActivity extends Activity{
             mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
 
 
-            float dx = lastTouchX-newX;
-            float dy = lastTouchY-newY;
-            screenPos.offset(dx,dy);
 
-            lastTouchX = newX;
-            lastTouchY = newY;
 
+            transformationMatrix.postTranslate(-focusX, -focusY);
+            transformationMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor());
+
+            float dx = focusX-lastTouchX;
+            float dy = focusY-lastTouchY;
+
+            transformationMatrix.postTranslate(focusX + dx, focusY + dy);
+            m.postConcat(transformationMatrix);
+
+            lastTouchX = focusX;
+            lastTouchY = focusY;
+
+            for (int i = 0; i < mFrame.getChildCount(); i++) {
+                View currentView = mFrame.getChildAt(i);
+                //((Shapes) currentView).setZoomPoint(mid);
+                //((Shapes) currentView).setScale(mScaleFactor);
+                ((Shapes) currentView).setMatrix(m);
+                currentView.invalidate();
+            }
             return true;
         }
     }
