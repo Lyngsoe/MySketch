@@ -40,6 +40,8 @@ public class SketchActivity extends Activity{
     PointF screenPos = new PointF(0,0);
     float mScaleFactor = 1;
     boolean isRunning = false;
+    float lastTouchX;
+    float lastTouchY;
 
 
 
@@ -192,14 +194,33 @@ public class SketchActivity extends Activity{
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+           lastTouchX = detector.getFocusX();
+            lastTouchY = detector.getFocusY();
+            return true;
+        }
+        @Override
         public boolean onScale(ScaleGestureDetector detector) {
+            float newX = detector.getFocusX();
+            float newY = detector.getFocusY();
             Log.i(DEBUG_GESTURE_TAG,"entered onScale");
             String scale = mScaleFactor+ " ";
             Log.i(DEBUG_GESTURE_TAG,scale);
 
+
+
             //Sætter Scalefactor
             mScaleFactor *= detector.getScaleFactor();
             mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
+
+
+            float dx = lastTouchX-newX;
+            float dy = lastTouchY-newY;
+            screenPos.offset(dx,dy);
+
+            lastTouchX = newX;
+            lastTouchY = newY;
+
             return true;
         }
     }
