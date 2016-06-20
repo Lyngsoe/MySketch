@@ -40,13 +40,7 @@ public class SketchActivity extends Activity{
     PointF screenPos = new PointF(0,0);
     float mScaleFactor = 1;
     boolean isRunning = false;
-    float  mLastTouchX;
-    float mLastTouchY;
-    int mActivePointerId;
 
-    PointF start = new PointF();
-    PointF mid = new PointF();
-    float oldDist = 1f;
 
 
     @Override
@@ -94,7 +88,6 @@ public class SketchActivity extends Activity{
                         View currentView = mFrame.getChildAt(i);
                         ((Shapes) currentView).setDraw(screenPos.x, screenPos.y); //offset position
                         ((Shapes) currentView).setScale(mScaleFactor); //Zoom faktor
-                        ((Shapes) currentView).setZoomPoint(mid); //Zoom centrum
                         currentView.invalidate();
                     }
                 }
@@ -157,13 +150,6 @@ public class SketchActivity extends Activity{
         }
     }
 
-    private void midPoint(PointF point, MotionEvent event) {
-        // finder midtpunktet mellem to touches
-        float x = event.getX(0) + event.getX(1);
-        float y = event.getY(0) + event.getY(1);
-        point.set(x / 2, y / 2);
-    }
-
     public boolean onTouchEvent(MotionEvent event){
         boolean retVal = mScaleGestureDetector.onTouchEvent(event);
         retVal = gestureListener.onTouchEvent(event) || retVal;
@@ -177,8 +163,6 @@ public class SketchActivity extends Activity{
             }
             case MotionEvent.ACTION_POINTER_DOWN:
                 Log.i(TOUCH_TAG,"Action_Pointer down!");
-                //zoom centrum
-                midPoint(mid, event);
                 break;
         }
 
