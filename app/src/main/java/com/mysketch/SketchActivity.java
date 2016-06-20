@@ -36,6 +36,7 @@ public class SketchActivity extends Activity{
 
     RelativeLayout mFrame;
 
+    Shapes mCurrentShape;
     String mCurrentProject;
     ArrayList<Shapes> shapesList = new ArrayList<>();
 
@@ -121,7 +122,7 @@ public class SketchActivity extends Activity{
                             }
                             Shapes temp = new Circle(SketchActivity.this, mCurrentProject, true, 0, 0, floatin*meter);
                             mFrame.addView(temp);
-                            shapesList.add(temp);
+                            shapesList.add(0, temp);
                         }
                         catch(NumberFormatException e) {
                             Toast.makeText(getApplicationContext(), "wrong input", Toast.LENGTH_SHORT).show();
@@ -181,10 +182,11 @@ public class SketchActivity extends Activity{
     //loader alle shapes for det nuværende project.
     private void loadSavedData(){
         shapesList = new ArrayList<>();
+        mFrame.removeAllViews();
         Shapes[] loadShapes = DataManager.loadAllShapes(getApplicationContext(), mCurrentProject, false, false);
         if(loadShapes != null && loadShapes.length>0){
             for(Shapes shape : loadShapes){
-                shapesList.add(shape);
+                shapesList.add(0, shape);
                 mFrame.addView(shape);
             }
         }
@@ -199,6 +201,7 @@ public class SketchActivity extends Activity{
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 Log.i(TOUCH_TAG,"Action down!");
+                mCurrentShape = getIntersectingShape(event.getX(), event.getY());
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -209,14 +212,37 @@ public class SketchActivity extends Activity{
         return retVal || super.onTouchEvent(event);
     }
 
+    public Shapes getIntersectingShape(float x, float y) {
+        //transforms x and y
+        float[] v = new float[9];
+        m.getValues(v);
+
+        //calculations
+        float tx = v[Matrix.MTRANS_X];
+        float ty = v[Matrix.MTRANS_Y];
+
+        for(Shapes shape : shapesList){
+            if(shape.Intersects(x-tx, y-ty)){
+                return shape;
+            }
+        }
+        return null;
+    }
+
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (!mScaleGestureDetector.isInProgress()) {
                 Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
+                if(mCurrentShape != null){
+                    //TODO scale x og y
+                    mCurrentShape.Move(distanceX, distanceY);
+                }
+                else{
+                    m.postTranslate(-distanceX,-distanceY);
+                }
 
-                m.postTranslate(-distanceX,-distanceY);
                 for (int i = 0; i < mFrame.getChildCount(); i++) {
                     View currentView = mFrame.getChildAt(i);
                     ((Shapes) currentView).setMatrix(m);
@@ -225,6 +251,7 @@ public class SketchActivity extends Activity{
 
                 String pos = (int) screenPos.x + " " + (int) screenPos.y;
                 Log.i(DEBUG_GESTURE_TAG, pos);
+
 
             }
             return true;
