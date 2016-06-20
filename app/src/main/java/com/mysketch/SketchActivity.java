@@ -143,8 +143,10 @@ public class SketchActivity extends Activity{
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                Log.i(TOUCH_TAG,"Action down!");
-                currentShape = Intersects(event.getX(),event.getY());
+
+                currentShape = Intersects(event.getX(0),event.getY(0));
+
+                Log.i(TOUCH_TAG,"Action down! " );
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -168,12 +170,11 @@ public class SketchActivity extends Activity{
             if (!mScaleGestureDetector.isInProgress()) {
 
                 if (currentShape != null) {
+                    Log.i(DEBUG_GESTURE_TAG, "shape selected!");
                     currentShape.Move(distanceX, distanceY);
                 } else {
                     Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
-
-
-                    //scroll
+                    //Scroll
                     m.postTranslate(-distanceX, -distanceY);
                 }
 
@@ -193,10 +194,32 @@ public class SketchActivity extends Activity{
     }
 
     public Shapes Intersects(float x, float y){
-        for (int i = 0; i<shapesList.size(); i++){
-            View currentView = mFrame.getChildAt(i);
 
-            if (((Shapes) currentView).Intersects(x,y)){
+        float[] v = new float[9];
+        m.getValues(v);
+        //translate in x and y
+        float tx = v[Matrix.MTRANS_X];
+        float ty = v[Matrix.MTRANS_Y];
+
+        // calculate real scale
+        float scalex = v[Matrix.MSCALE_X];
+       float skewy = v[Matrix.MSKEW_Y];
+        float skewx = v[Matrix.MSKEW_X];
+        float scaley = v[Matrix.MSCALE_Y];
+        float rScale = (float) Math.sqrt(scalex * scalex + skewy * skewy);// skewy * skewy);
+
+        //
+        tx*=rScale;
+        ty*=rScale;
+
+
+        for (int i = 0; i<mFrame.getChildCount(); i++){
+            View currentView = mFrame.getChildAt(i);
+            float ix = x-tx;
+            float iy = y-ty;
+            Log.i("XYcoords","Intersects x:" + ix + " y:" + iy);
+
+            if (((Shapes) currentView).Intersects(x-tx,y-ty)){
                 return (Shapes)currentView;
             }
         }
