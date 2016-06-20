@@ -1,6 +1,7 @@
 package com.mysketch;
 
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.view.View;
 
@@ -10,6 +11,7 @@ import android.view.View;
 public abstract class Shapes extends View {
     float mScaleFactor = 1;
     PointF zoomPoint;
+    Matrix m;
 
     float x;
     float y;
@@ -68,6 +70,8 @@ public abstract class Shapes extends View {
     public abstract boolean Intersects(float x, float y);
 
     public abstract void Move(float dx, float dy);
+
+    public void setMatrix(Matrix m){this.m = m;}
 
 
 
