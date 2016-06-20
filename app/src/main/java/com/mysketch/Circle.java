@@ -2,6 +2,7 @@ package com.mysketch;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 
@@ -23,6 +24,7 @@ public class Circle extends Shapes {
         super(context, projectName, SHAPE_TYPE, addInstance, x, y);
         mPainter.setStyle(Paint.Style.STROKE);
         mPainter.setStrokeWidth(STROKE_WIDTH);
+
         this.radius=radius;
 
         if(addInstance){
@@ -39,6 +41,11 @@ public class Circle extends Shapes {
         //canvas.drawCircle(x-getTranslationX(),y-getTranslationY(),100,mPainter);
 
         canvas.restore();
+    }
+    @Override
+    public void ChangeColorAndStrokeW(int c, float strokeWidth){
+        mPainter.setColor(c);
+        mPainter.setStrokeWidth(strokeWidth);
     }
 
     @Override

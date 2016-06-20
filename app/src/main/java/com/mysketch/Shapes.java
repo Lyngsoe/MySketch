@@ -3,6 +3,7 @@ package com.mysketch;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.view.ContextMenu;
 import android.view.View;
 
 /**
@@ -71,6 +72,7 @@ public abstract class Shapes extends View {
 
     public abstract void Move(float dx, float dy);
 
+    public abstract void ChangeColorAndStrokeW(int color,float strokeW);
 
 
 

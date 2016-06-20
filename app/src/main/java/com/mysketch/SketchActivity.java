@@ -3,6 +3,7 @@ package com.mysketch;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -206,6 +207,11 @@ public class SketchActivity extends Activity{
                 Log.i(TOUCH_TAG,"Action down!");
 
                 mCurrentShape = getIntersectingShape(event.getX(), event.getY());
+                if(mCurrentShape != null) {
+                    mCurrentShape.ChangeColorAndStrokeW(Color.BLUE, 6f);
+                } else {
+                    mCurrentShape.ChangeColorAndStrokeW(Color.BLACK, 4.5f);
+                }
 
                 break;
             }

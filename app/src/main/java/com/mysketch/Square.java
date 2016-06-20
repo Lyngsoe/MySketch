@@ -58,7 +58,8 @@ public class Square extends Shapes {
 
     @Override
     public void Move(float dx, float dy) {
-        //TODO
+        this.x+=dx;
+        this.y+=dy;
     }
 
     @Override
@@ -75,7 +76,10 @@ public class Square extends Shapes {
         canvas.restore();
     }
 
-    public void clicksOnsquare(){
+    @Override
+    public void ChangeColorAndStrokeW(int c, float strokeWidth){
+        paint.setColor(c);
+        paint.setStrokeWidth(strokeWidth);
 
     }
 }
