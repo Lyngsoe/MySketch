@@ -40,6 +40,7 @@ public class SketchActivity extends Activity{
     String mCurrentProject;
     ArrayList<Shapes> shapesList = new ArrayList<>();
 
+
     int mDisplayHeight;
     int mDisplayWidth;
     GestureDetectorCompat gestureListener;
@@ -120,7 +121,8 @@ public class SketchActivity extends Activity{
                             if(floatin <= 0.0f){
                                 throw new NumberFormatException();
                             }
-                            Shapes temp = new Circle(SketchActivity.this, mCurrentProject, true, 0, 0, floatin*meter);
+                            Shapes temp = new Circle(SketchActivity.this, mCurrentProject, true, screenPos.x,  screenPos.y, floatin*meter); //TODO make new stuff be drawn in the middle
+                            temp.setMatrix(m);
                             mFrame.addView(temp);
                             shapesList.add(0, temp);
                         }
@@ -202,9 +204,12 @@ public class SketchActivity extends Activity{
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 Log.i(TOUCH_TAG,"Action down!");
+
                 mCurrentShape = getIntersectingShape(event.getX(), event.getY());
+
                 break;
             }
+
             case MotionEvent.ACTION_POINTER_DOWN:
                 Log.i(TOUCH_TAG,"Action_Pointer down!");
                 break;
@@ -215,20 +220,28 @@ public class SketchActivity extends Activity{
 
     public Shapes getIntersectingShape(float x, float y) {
         //transforms x and y
+        Matrix minv = new Matrix();
+        m.invert(minv);
         float[] v = new float[9];
         m.getValues(v);
 
         //calculations
         float tx = v[Matrix.MTRANS_X];
         float ty = v[Matrix.MTRANS_Y];
-        float scalex = v[Matrix.MSCALE_X];
-        float scaley = v[Matrix.MSCALE_Y];
-        float coordx = (x-tx) * scalex;
-        float coordy = (y-ty) * scaley;
+
+        float coordx = (x - tx) / mScaleFactor;
+        float coordy = (y - ty) / mScaleFactor;
+
+
+
+
+        Log.i("Hej","Coord x: " + coordx + " Coord y: " +coordy);
+        Log.i("Hej","Scale factor: " + mScaleFactor);
 
         for(Shapes shape : shapesList){
 
             if(shape.Intersects(coordx, coordy)){
+                Log.i("Hej","Shape x: " + shape.x + " Shape y: "+ shape.y);
                 return shape;
             }
         }
@@ -240,10 +253,12 @@ public class SketchActivity extends Activity{
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (!mScaleGestureDetector.isInProgress()) {
-                Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
+
                 if(mCurrentShape != null){
                     //TODO scale x og y
-                    mCurrentShape.Move(distanceX, distanceY);
+                    //transforms x and y
+
+                    mCurrentShape.Move(distanceX / mScaleFactor, distanceY / mScaleFactor);
                 }
                 else{
                     m.postTranslate(-distanceX,-distanceY);
@@ -256,7 +271,7 @@ public class SketchActivity extends Activity{
                 }
 
                 String pos = (int) screenPos.x + " " + (int) screenPos.y;
-                Log.i(DEBUG_GESTURE_TAG, pos);
+              //  Log.i(DEBUG_GESTURE_TAG, pos);
 
 
             }
@@ -277,9 +292,9 @@ public class SketchActivity extends Activity{
             Matrix transformationMatrix = new Matrix();
             float focusX = detector.getFocusX();
             float focusY = detector.getFocusY();
-            Log.i(DEBUG_GESTURE_TAG,"entered onScale");
+           // Log.i(DEBUG_GESTURE_TAG,"entered onScale");
             String scale = mScaleFactor+ " ";
-            Log.i(DEBUG_GESTURE_TAG,scale);
+            //Log.i(DEBUG_GESTURE_TAG,scale);
 
             //Sætter Scalefactor
             mScaleFactor *= detector.getScaleFactor();
@@ -296,6 +311,7 @@ public class SketchActivity extends Activity{
 
             lastTouchX = focusX;
             lastTouchY = focusY;
+
 
             for (int i = 0; i < mFrame.getChildCount(); i++) {
                 View currentView = mFrame.getChildAt(i);
