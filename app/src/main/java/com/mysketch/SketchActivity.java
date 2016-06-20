@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
@@ -43,6 +44,7 @@ public class SketchActivity extends Activity{
     float lastTouchX;
     float lastTouchY;
     Matrix m;
+    Shapes currentShape;
 
 
 
@@ -142,11 +144,16 @@ public class SketchActivity extends Activity{
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 Log.i(TOUCH_TAG,"Action down!");
+                currentShape = Intersects(event.getX(),event.getY());
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN:
                 Log.i(TOUCH_TAG,"Action_Pointer down!");
                 break;
+
+            case MotionEvent.ACTION_UP:
+                Log.i(TOUCH_TAG,"Action_UP, done!");
+                currentShape = null;
         }
 
         return retVal || super.onTouchEvent(event);
@@ -154,25 +161,46 @@ public class SketchActivity extends Activity{
 
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
 
+
+
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (!mScaleGestureDetector.isInProgress()) {
-                Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
 
-                m.postTranslate(-distanceX,-distanceY);
-                for (int i = 0; i < mFrame.getChildCount(); i++) {
-                    View currentView = mFrame.getChildAt(i);
-                    ((Shapes) currentView).setMatrix(m);
-                    currentView.invalidate();
+                if (currentShape != null) {
+                    currentShape.Move(distanceX, distanceY);
+                } else {
+                    Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
+
+
+                    //scroll
+                    m.postTranslate(-distanceX, -distanceY);
                 }
 
-                String pos = (int) screenPos.x + " " + (int) screenPos.y;
-                Log.i(DEBUG_GESTURE_TAG, pos);
+                    for (int i = 0; i < mFrame.getChildCount(); i++) {
+                        View currentView = mFrame.getChildAt(i);
+                        ((Shapes) currentView).setMatrix(m);
+                        currentView.invalidate();
+                    }
 
-            }
+                    String pos = (int) screenPos.x + " " + (int) screenPos.y;
+                    Log.i(DEBUG_GESTURE_TAG, pos);
+                }
+
             return true;
         }
 
+    }
+
+    public Shapes Intersects(float x, float y){
+        for (int i = 0; i<shapesList.size(); i++){
+            View currentView = mFrame.getChildAt(i);
+
+            if (((Shapes) currentView).Intersects(x,y)){
+                return (Shapes)currentView;
+            }
+        }
+        return null;
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {

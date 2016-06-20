@@ -34,7 +34,7 @@ public class Circle extends Shapes {
         canvas.save();
 
         canvas.setMatrix(m);
-        canvas.drawCircle(x-drawX,y-drawY,radius,mPainter);
+        canvas.drawCircle(x,y,radius,mPainter);
         //canvas.drawCircle(x-getTranslationX(),y-getTranslationY(),100,mPainter);
 
         canvas.restore();
@@ -49,7 +49,8 @@ public class Circle extends Shapes {
 
     @Override
     public void Move(float dx, float dy) {
-        //TODO
+        this.x+=dx;
+        this.y+=dy;
     }
 
 }

@@ -71,6 +71,10 @@ public abstract class Shapes extends View {
 
     public abstract void Move(float dx, float dy);
 
+
+
+
+
     public void setMatrix(Matrix m){this.m = m;}
 
 
