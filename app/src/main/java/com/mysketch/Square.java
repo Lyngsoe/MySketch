@@ -66,11 +66,11 @@ public class Square extends Shapes {
 
         canvas.save();
 
-        canvas.scale(mScaleFactor, mScaleFactor);
-        canvas.drawLine(x-drawX,y-drawY,x-drawX+w,y-drawY,paint);
-        canvas.drawLine(x-drawX,y-drawY,x-drawX,y-drawY+h,paint);
-        canvas.drawLine(x-drawX+w,y-drawY+h,x-drawX,y-drawY+h,paint);
-        canvas.drawLine(x-drawX+w,y-drawY+h,x-drawX+w,y-drawY,paint);
+        canvas.setMatrix(m);
+        canvas.drawLine(x,y,x+w,y,paint);
+        canvas.drawLine(x,y,x,y+h,paint);
+        canvas.drawLine(x+w,y+h,x,y+h,paint);
+        canvas.drawLine(x+w,y+h,x+w,y,paint);
 
         canvas.restore();
     }
