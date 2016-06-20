@@ -19,6 +19,9 @@ import com.example.benjamin.git.MySketch.R;
 public class MainActivity extends AppCompatActivity {
 
     static final String PROJECT_NAME_KEY = "currentProject";
+    static final String SAVE_DIALOG_STATE_KEY = "mDialogState";
+
+    int mDialogState = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +51,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeNewProject() {
+
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle("New Project");
-        alertBuilder.setMessage("Enter Title of New Project");
+        alertBuilder.setMessage("Enter Title of New Project:");
 
         final EditText input = new EditText(getApplicationContext());
         input.setTextColor(Color.BLACK);
@@ -62,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String title = input.getEditableText().toString();
                 if(!DataManager.newProject(title)){
-                    Toast.makeText(getApplicationContext(),"The Title \""+title+"\" Is Already In Use",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"The Title \""+title+"\" Is Already In Use.",Toast.LENGTH_SHORT).show();
                     dialog.cancel();
                     makeNewProject();
                     return;
@@ -71,25 +75,43 @@ public class MainActivity extends AppCompatActivity {
                 loadNew.putExtra(PROJECT_NAME_KEY, title);
                 startActivity(loadNew);
                 Toast.makeText(getApplicationContext(),"\""+title+"\" Created.",Toast.LENGTH_SHORT).show();
+
+                mDialogState = 0;
             }
         });
         alertBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 dialog.cancel();
+
+                mDialogState = 0;
+            }
+        });
+        alertBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                mDialogState = 0;
+            }
+        });
+        alertBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mDialogState = 0;
             }
         });
         AlertDialog alertDialog = alertBuilder.create();
         alertDialog.show();
+        mDialogState = 1;
     }
 
     private void showFileChooser() {
+
         final String items[] = DataManager.getAllNamesOfProjects();
 
         if(items != null && items.length > 0) {
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Select Project to Load.\n.../"+DataManager.DIR);
-            builder.setItems(items, new DialogInterface.OnClickListener() {
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+            alertBuilder.setTitle("Select Project to Load.\n"+DataManager.DIR);
+            alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int position) {
                     String title = items[position];
@@ -97,17 +119,27 @@ public class MainActivity extends AppCompatActivity {
                     load.putExtra(PROJECT_NAME_KEY, title);
                     startActivity(load);
                     Toast.makeText(getApplicationContext(),"\""+title+"\" Loaded.",Toast.LENGTH_SHORT).show();
+                    mDialogState = 0;
                 }
             });
-            final AlertDialog alertDialog = builder.create();
-            alertDialog.setOnShowListener(new DialogInterface.OnShowListener()
-            {
+            alertBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
-                public void onShow(DialogInterface dialog)
-                {
+                public void onDismiss(DialogInterface dialog) {
+                    mDialogState = 0;
+                }
+            });
+            alertBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    mDialogState = 0;
+                }
+            });
+            final AlertDialog alertDialog = alertBuilder.create();
+            alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialog) {
                     final ListView lv = alertDialog.getListView();
                     lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
                         @Override
                         public boolean onItemLongClick(final AdapterView<?> parent, View view, final int position, long id) {
                             DataManager.deleteProject(items[position]);
@@ -119,10 +151,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             alertDialog.show();
+            mDialogState = 2;
         }
         else{
             Toast.makeText(getApplicationContext(), "No Project(s) Found", Toast.LENGTH_SHORT).show();
         }
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mDialogState = savedInstanceState.getInt(SAVE_DIALOG_STATE_KEY);
+        switch (mDialogState){
+            case 1: makeNewProject(); break;
+            case 2: showFileChooser(); break;
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(SAVE_DIALOG_STATE_KEY, mDialogState);
+        super.onSaveInstanceState(outState);
+    }
 }

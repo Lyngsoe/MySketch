@@ -12,18 +12,17 @@ public class Circle extends Shapes {
     final static String SHAPE_TYPE = "CIRCLE";
 
     final static String LOGTAG = "Circle";
+    final static float STROKE_WIDTH = 4.5f;
 
     private final Paint mPainter = new Paint();
     float radius;
 
 
     public Circle(Context context, String projectName, boolean addInstance, float x, float y, float radius){
-        super(context, projectName, SHAPE_TYPE, addInstance);
+        super(context, projectName, SHAPE_TYPE, addInstance, x, y);
         mPainter.setStyle(Paint.Style.STROKE);
-        mPainter.setStrokeWidth(4.5f);
+        mPainter.setStrokeWidth(STROKE_WIDTH);
         this.radius=radius;
-        this.x = x;
-        this.y = y;
 
         if(addInstance){
             DataManager.saveAndOverwriteSingleShape(this);
@@ -43,8 +42,9 @@ public class Circle extends Shapes {
 
     @Override
     public boolean Intersects(float x, float y) {
-        //TODO
-        return false;
+        float max = radius + STROKE_WIDTH/2;
+        float dist = (float) Math.sqrt(Math.pow(this.x-x, 2) + Math.pow(this.y-y, 2));
+        return dist > max - STROKE_WIDTH && dist < max;
     }
 
     @Override

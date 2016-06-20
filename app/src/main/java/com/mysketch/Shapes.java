@@ -20,10 +20,12 @@ public abstract class Shapes extends View {
     int uniqueID;
     String shapeType;
 
-    public Shapes(Context context, String projectName, String shapeType, boolean addInstance){
+    public Shapes(Context context, String projectName, String shapeType, boolean addInstance, float x, float y){
         super(context);
         this.projectName = projectName;
         this.shapeType = shapeType;
+        this.x = x;
+        this.y = y;
         if(addInstance) {
             this.uniqueID = DataManager.getUniqueID(projectName);
         }
