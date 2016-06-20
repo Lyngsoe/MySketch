@@ -2,6 +2,7 @@ package com.mysketch;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 
 /**
@@ -34,7 +35,7 @@ public class Circle extends Shapes {
         canvas.save();
 
         canvas.setMatrix(m);
-        canvas.drawCircle(x,y,radius,mPainter);
+        canvas.drawCircle(x-drawX,y-drawY,radius,mPainter);
         //canvas.drawCircle(x-getTranslationX(),y-getTranslationY(),100,mPainter);
 
         canvas.restore();
@@ -42,15 +43,17 @@ public class Circle extends Shapes {
 
     @Override
     public boolean Intersects(float x, float y) {
-        float max = radius; // + STROKE_WIDTH/2;
+        float max = radius + STROKE_WIDTH/2;
         float dist = (float) Math.sqrt(Math.pow(this.x-x, 2) + Math.pow(this.y-y, 2));
-        return dist < max ;// - STROKE_WIDTH && dist < max;
+        return dist < max;//- STROKE_WIDTH && dist < max;
     }
 
     @Override
     public void Move(float dx, float dy) {
-        this.x-=dx;
-        this.y-=dy;
+        float[] v = new float[9];
+        getMatrix().getValues(v);
+        this.x -= dx * v[Matrix.MSCALE_X];
+        this.y -= dy * v[Matrix.MSCALE_Y];
     }
 
 }

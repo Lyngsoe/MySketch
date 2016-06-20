@@ -1,21 +1,27 @@
 package com.mysketch;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ShareCompat;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.text.Layout;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.example.benjamin.git.MySketch.R;
 
@@ -30,6 +36,7 @@ public class SketchActivity extends Activity{
 
     RelativeLayout mFrame;
 
+    Shapes mCurrentShape;
     String mCurrentProject;
     ArrayList<Shapes> shapesList = new ArrayList<>();
 
@@ -44,7 +51,6 @@ public class SketchActivity extends Activity{
     float lastTouchX;
     float lastTouchY;
     Matrix m;
-    Shapes currentShape;
 
 
 
@@ -54,7 +60,7 @@ public class SketchActivity extends Activity{
         setContentView(R.layout.frame);
 
         //Frame som indeholder alle views
-        mFrame = (RelativeLayout) findViewById(R.id.frame);
+        mFrame = (RelativeLayout) findViewById(R.id.frameSketch);
 
         //Opsætter display størrelse
         Display display = getWindowManager().getDefaultDisplay();
@@ -71,6 +77,17 @@ public class SketchActivity extends Activity{
         gestureListener = new GestureDetectorCompat(this, new MyGestureListener());
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
+        //button
+        final Button butt = (Button) findViewById(R.id.button);
+        butt.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                testDialog();
+            }
+        });
+
+
         //Indstiller project der arbejdes med
         mCurrentProject = getIntent().getStringExtra(MainActivity.PROJECT_NAME_KEY);
 
@@ -78,11 +95,50 @@ public class SketchActivity extends Activity{
         loadSavedData();
 
         //Test
-        new Circle(this, mCurrentProject, true, 100,100,200);
-        new Square(this, mCurrentProject, true, 100,100,100,100);
-        new Square(this, mCurrentProject, true, 50,50,50,50);
+        testDialog();
 
     }
+    private void testDialog() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("radius of circle in meter");
+        alertDialog.setMessage("Enter text");
+
+        final EditText input = new EditText(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton("YES",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String inputString = input.getText().toString();
+                        float floatin = -1.0f;
+                        try {
+                            floatin = Float.parseFloat(inputString);
+                            if(floatin <= 0.0f){
+                                throw new NumberFormatException();
+                            }
+                            Shapes temp = new Circle(SketchActivity.this, mCurrentProject, true, 0, 0, floatin*meter);
+                            mFrame.addView(temp);
+                            shapesList.add(0, temp);
+                        }
+                        catch(NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), "wrong input", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        alertDialog.setNegativeButton("NO",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+    }
+
 
     @Override
     public void onResume() {
@@ -126,10 +182,12 @@ public class SketchActivity extends Activity{
     //loader alle shapes for det nuværende project.
     private void loadSavedData(){
         shapesList = new ArrayList<>();
+        mFrame.removeAllViews();
         Shapes[] loadShapes = DataManager.loadAllShapes(getApplicationContext(), mCurrentProject, false, false);
         if(loadShapes != null && loadShapes.length>0){
             for(Shapes shape : loadShapes){
-                shapesList.add(shape);
+                shape.setMatrix(m);
+                shapesList.add(0, shape);
                 mFrame.addView(shape);
             }
         }
@@ -143,87 +201,68 @@ public class SketchActivity extends Activity{
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-
-                currentShape = Intersects(event.getX(0),event.getY(0));
-
-                Log.i(TOUCH_TAG,"Action down! " );
+                Log.i(TOUCH_TAG,"Action down!");
+                mCurrentShape = getIntersectingShape(event.getX(), event.getY());
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN:
                 Log.i(TOUCH_TAG,"Action_Pointer down!");
                 break;
-
-            case MotionEvent.ACTION_UP:
-                Log.i(TOUCH_TAG,"Action_UP, done!");
-                currentShape = null;
         }
 
         return retVal || super.onTouchEvent(event);
     }
 
+    public Shapes getIntersectingShape(float x, float y) {
+        //transforms x and y
+        float[] v = new float[9];
+        m.getValues(v);
+
+        //calculations
+        float tx = v[Matrix.MTRANS_X];
+        float ty = v[Matrix.MTRANS_Y];
+        float scalex = v[Matrix.MSCALE_X];
+        float scaley = v[Matrix.MSCALE_Y];
+        float coordx = (x-tx) * scalex;
+        float coordy = (y-ty) * scaley;
+
+        for(Shapes shape : shapesList){
+
+            if(shape.Intersects(coordx, coordy)){
+                return shape;
+            }
+        }
+        return null;
+    }
+
     class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
-
-
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (!mScaleGestureDetector.isInProgress()) {
-
-                if (currentShape != null) {
-                    Log.i(DEBUG_GESTURE_TAG, "shape selected!");
-                    currentShape.Move(distanceX, distanceY);
-                } else {
-                    Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
-                    //Scroll
-                    m.postTranslate(-distanceX, -distanceY);
+                Log.i(DEBUG_GESTURE_TAG, "entered onScroll");
+                if(mCurrentShape != null){
+                    //TODO scale x og y
+                    mCurrentShape.Move(distanceX, distanceY);
+                }
+                else{
+                    m.postTranslate(-distanceX,-distanceY);
                 }
 
-                    for (int i = 0; i < mFrame.getChildCount(); i++) {
-                        View currentView = mFrame.getChildAt(i);
-                        ((Shapes) currentView).setMatrix(m);
-                        currentView.invalidate();
-                    }
-
-                    String pos = (int) screenPos.x + " " + (int) screenPos.y;
-                    Log.i(DEBUG_GESTURE_TAG, pos);
+                for (int i = 0; i < mFrame.getChildCount(); i++) {
+                    View currentView = mFrame.getChildAt(i);
+                    ((Shapes) currentView).setMatrix(m);
+                    currentView.invalidate();
                 }
 
+                String pos = (int) screenPos.x + " " + (int) screenPos.y;
+                Log.i(DEBUG_GESTURE_TAG, pos);
+
+
+            }
             return true;
         }
 
-    }
-
-    public Shapes Intersects(float x, float y){
-
-        float[] v = new float[9];
-        m.getValues(v);
-        //translate in x and y
-        float tx = v[Matrix.MTRANS_X];
-        float ty = v[Matrix.MTRANS_Y];
-
-        // calculate real scale
-        float scalex = v[Matrix.MSCALE_X];
-       float skewy = v[Matrix.MSKEW_Y];
-        float skewx = v[Matrix.MSKEW_X];
-        float scaley = v[Matrix.MSCALE_Y];
-        float rScale = (float) Math.sqrt(scalex * scalex + skewy * skewy);// skewy * skewy);
-
-        //
-        tx*=rScale;
-        ty*=rScale;
-
-
-        for (int i = 0; i<mFrame.getChildCount(); i++){
-            View currentView = mFrame.getChildAt(i);
-            float ix = x-tx;
-            float iy = y-ty;
-            Log.i("XYcoords","Intersects x:" + ix + " y:" + iy);
-
-            if (((Shapes) currentView).Intersects(x-tx,y-ty)){
-                return (Shapes)currentView;
-            }
-        }
-        return null;
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
