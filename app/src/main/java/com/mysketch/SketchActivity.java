@@ -1,6 +1,8 @@
 package com.mysketch;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -8,13 +10,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.text.Layout;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.example.benjamin.git.MySketch.R;
 
@@ -52,7 +59,7 @@ public class SketchActivity extends Activity{
         setContentView(R.layout.frame);
 
         //Frame som indeholder alle views
-        mFrame = (RelativeLayout) findViewById(R.id.frame);
+        mFrame = (RelativeLayout) findViewById(R.id.frameSketch);
 
         //Opsætter display størrelse
         Display display = getWindowManager().getDefaultDisplay();
@@ -69,6 +76,17 @@ public class SketchActivity extends Activity{
         gestureListener = new GestureDetectorCompat(this, new MyGestureListener());
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
+        //button
+        final Button butt = (Button) findViewById(R.id.button);
+        butt.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                testDialog();
+            }
+        });
+
+
         //Indstiller project der arbejdes med
         mCurrentProject = getIntent().getStringExtra(MainActivity.PROJECT_NAME_KEY);
 
@@ -76,11 +94,50 @@ public class SketchActivity extends Activity{
         loadSavedData();
 
         //Test
-        new Circle(this, mCurrentProject, true, 100,100,200);
-        new Square(this, mCurrentProject, true, 100,100,100,100);
-        new Square(this, mCurrentProject, true, 50,50,50,50);
+        testDialog();
 
     }
+    private void testDialog() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("radius of circle in meter");
+        alertDialog.setMessage("Enter text");
+
+        final EditText input = new EditText(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton("YES",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String inputString = input.getText().toString();
+                        float floatin = -1.0f;
+                        try {
+                            floatin = Float.parseFloat(inputString);
+                            if(floatin <= 0.0f){
+                                throw new NumberFormatException();
+                            }
+                            Shapes temp = new Circle(SketchActivity.this, mCurrentProject, true, 0, 0, floatin*meter);
+                            mFrame.addView(temp);
+                            shapesList.add(temp);
+                        }
+                        catch(NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), "wrong input", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        alertDialog.setNegativeButton("NO",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+    }
+
 
     @Override
     public void onResume() {
