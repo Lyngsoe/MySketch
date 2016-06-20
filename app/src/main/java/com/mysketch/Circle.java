@@ -50,10 +50,10 @@ public class Circle extends Shapes {
 
     @Override
     public void Move(float dx, float dy) {
-        //float[] v = new float[9];
-        //m.getValues(v);
-        this.x -= dx; //* v[Matrix.MSCALE_X];
-        this.y -= dy; //* v[Matrix.MSCALE_Y];
+        float[] v = new float[9];
+        getMatrix().getValues(v);
+        this.x -= dx * v[Matrix.MSCALE_X];
+        this.y -= dy * v[Matrix.MSCALE_Y];
     }
 
 }

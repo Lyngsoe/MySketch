@@ -186,6 +186,7 @@ public class SketchActivity extends Activity{
         Shapes[] loadShapes = DataManager.loadAllShapes(getApplicationContext(), mCurrentProject, false, false);
         if(loadShapes != null && loadShapes.length>0){
             for(Shapes shape : loadShapes){
+                shape.setMatrix(m);
                 shapesList.add(0, shape);
                 mFrame.addView(shape);
             }
