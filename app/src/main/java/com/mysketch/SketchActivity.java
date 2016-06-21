@@ -455,7 +455,12 @@ public class SketchActivity extends Activity{
         return addInstance ? addedInstance(newCircle) : newCircle;
     }
 
-    private Shapes makeNewLine(float x, float y, float strokeWidth, float x2, float y2, boolean addInstance){
+    private Shapes makeNewLine(float x, float y, float strokeWidth, float length, boolean isVertical, boolean addInstance){
+        x -= length/2;
+        y -= length/2;
+        float x2 = (isVertical) ? x : x+length;
+        float y2 = (isVertical) ? y+length : y;
+
         Shapes newLine = new Line(getApplicationContext(), mCurrentProject, x, y, strokeWidth, x2, y2);
         return addInstance ? addedInstance(newLine) : newLine;
     }
