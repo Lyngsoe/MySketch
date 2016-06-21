@@ -193,7 +193,7 @@ public class SketchActivity extends Activity{
         final EditText width = new EditText(this);
         height.setHint(R.string.make_square_hint_heigth);
         width.setHint(R.string.make_square_hint_width);
-        //length
+        //height
         height.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
