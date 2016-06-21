@@ -207,11 +207,12 @@ public class SketchActivity extends Activity{
                 Log.i(TOUCH_TAG,"Action down!");
 
                 mCurrentShape = getIntersectingShape(event.getX(), event.getY());
-                if(mCurrentShape != null) {
+                try {
                     mCurrentShape.ChangeColorAndStrokeW(Color.BLUE, 6f);
-                } else {
-                    mCurrentShape.ChangeColorAndStrokeW(Color.BLACK, 4.5f);
-                }
+                } catch (Exception(mCurrentShape==null));
+                    
+
+
 
                 break;
             }
