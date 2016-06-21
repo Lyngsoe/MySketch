@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">MySketch</string>
+
+    <string-array name="add_types">
+        <item> Circle </item>
+        <item> Square </item>
+        <item> Line </item>
+
+
+    </string-array>
+
+
+
+
 </resources>

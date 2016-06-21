@@ -7,20 +7,19 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
-import android.text.Layout;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.benjamin.git.MySketch.R;
@@ -34,11 +33,10 @@ public class SketchActivity extends Activity{
 
     private static final String KEY_PROJECT_NAME = "projectName_key";
 
-    RelativeLayout mFrame;
+    FrameLayout mFrame;
 
     String mCurrentProject;
     ArrayList<Shapes> shapesList = new ArrayList<>();
-
     int mDisplayHeight;
     int mDisplayWidth;
     GestureDetectorCompat gestureListener;
@@ -59,7 +57,7 @@ public class SketchActivity extends Activity{
         setContentView(R.layout.frame);
 
         //Frame som indeholder alle views
-        mFrame = (RelativeLayout) findViewById(R.id.frameSketch);
+        mFrame = (FrameLayout) findViewById(R.id.frameSketch);
 
         //Opsætter display størrelse
         Display display = getWindowManager().getDefaultDisplay();
@@ -77,12 +75,13 @@ public class SketchActivity extends Activity{
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
         //button
-        final Button butt = (Button) findViewById(R.id.button);
-        butt.setOnClickListener(new View.OnClickListener(){
+        final ImageButton addShape = (ImageButton) findViewById(R.id.btn_add);
+        addShape.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                testDialog();
+                addDialog();
+
             }
         });
 
@@ -94,15 +93,49 @@ public class SketchActivity extends Activity{
         loadSavedData();
 
         //Test
-        testDialog();
+        //addCircle();
+
+        addDialog();
 
     }
-    private void testDialog() {
+
+    private void addDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setItems(R.array.add_types, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        addCircle();
+                        System.out.println("case 0: Circle");
+                        //Circle ...
+                        break;
+                    case 1:
+                        addSquare();
+                        System.out.println("case 1: Square");
+                        //Square
+                        break;
+                    case 2:
+                        //addLine();
+                        //Line
+                        break;
+                }
+            }
+        });
+
+        builder.show();
+
+
+    }
+    private void addCircle() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("radius of circle in meter");
         alertDialog.setMessage("Enter text");
 
+
         final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
@@ -136,6 +169,67 @@ public class SketchActivity extends Activity{
                 });
 
         alertDialog.show();
+    }
+
+    public void addSquare(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("sidelengths of square in meters");
+        LinearLayout linLay = new LinearLayout(this);
+        linLay.setOrientation(LinearLayout.VERTICAL);
+
+
+
+        final EditText length = new EditText(this);
+        final EditText width = new EditText(this);
+        length.setHint("length");
+        width.setHint("width");
+        //length
+        length.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        length.setLayoutParams(lp);
+
+        linLay.addView(length);
+        linLay.addView(width);
+
+        //width
+        width.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        width.setLayoutParams(lp);
+
+
+
+        alertDialog.setPositiveButton("YES",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String lengthString = length.getText().toString();
+                        String widthString = width.getText().toString();
+                        float floatlen = -1.0f;
+                        float floatwid = -1.0f;
+                        try {
+                            floatlen = Float.parseFloat(lengthString);
+                            floatwid = Float.parseFloat(widthString);
+                            if(floatlen <= 0.0f || floatwid <= 0.0f){
+                                throw new NumberFormatException();
+                            }
+                            Shapes temp = new Square(SketchActivity.this, mCurrentProject, true, floatwid, floatlen, 0,0);
+                            mFrame.addView(temp);
+                            shapesList.add(temp);
+                        }
+                        catch(NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), "wrong input", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        alertDialog.setNegativeButton("NO",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        alertDialog.setView(linLay);
+        alertDialog.show();
+
     }
 
 
