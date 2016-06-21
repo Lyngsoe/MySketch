@@ -45,6 +45,13 @@ public class Line extends Shapes {
     }
 
     @Override
+    public void move(float dx, float dy){
+        super.move(dx, dy);
+        this.x2 -= dx;
+        this.y2 -= dy;
+    }
+
+    @Override
     public boolean Intersects(float px, float py) {
         float dist = (float) ( Math.abs((px-x)*(y2-y)-(py-y)*(x2-x)) / Math.hypot(x2-x, y2-x) );
         return dist <= strokeWidth;

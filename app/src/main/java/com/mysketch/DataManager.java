@@ -224,7 +224,7 @@ public class DataManager {
     }
 
     //loads a single file
-    public static Shapes loafSingleFile(Context context, String projectName, int uniqueID, boolean delete){
+    public static Shapes loadSingleFile(Context context, String projectName, int uniqueID, boolean delete){
         return loadSingleFile(new File(DIR+projectName, uniqueID + FILE_TYPE), delete).convert(context);
     }
     private static ShapeWrapper loadSingleFile(File file, boolean delete){

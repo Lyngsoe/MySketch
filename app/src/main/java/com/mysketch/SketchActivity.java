@@ -36,6 +36,8 @@ public class SketchActivity extends Activity{
     private static final String KEY_LAST_TOUCH = "lastTouch_key";
     private static final String KEY_MATRIX = "matrix_key";
 
+    private static final float MIN_SCALE = 0.1f;
+    private static final float MAX_SCALE = 5.0f;
 
     private String mCurrentProject;
     private Shapes mCurrentShape;
@@ -79,10 +81,14 @@ public class SketchActivity extends Activity{
         addShape.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addDialog();
-
+                if(mCurrentShape == null ){
+                    addDialog();
+                    return;
+                }
+                changeShape();
             }
         });
+
         //first instance of the sketchActivity only
         if (savedInstanceState == null) {
             //opsætter matrix
@@ -97,13 +103,191 @@ public class SketchActivity extends Activity{
 
             //Loader filer gemt under projectet
             loadSavedData();
-
-            //Test
-            //addCircle();
-
-            addDialog();
-
         }
+    }
+
+    private void changeShape(){
+        String shapeType = mCurrentShape.shapeType;
+        float x = mCurrentShape.getX();
+        float y = mCurrentShape.getY();
+
+        switch(shapeType){
+            case Circle.SHAPE_TYPE:{
+                changeCircle();
+                break;
+            }
+            case Square.SHAPE_TYPE:{
+                changeSquare();
+                break;
+            }
+            case Line.SHAPE_TYPE:{
+                changeLine();
+                break;
+            }
+        }
+
+    }
+
+    private void changeCircle(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(R.string.change_circle_title);
+        alertDialog.setMessage(R.string.make_circle_sub_title);
+
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        input.setHint("" + ((Circle) mCurrentShape).radius/staticScale);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton(R.string.default_enter,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String inputString = input.getText().toString();
+                        float floatin;
+                        try {
+                            floatin = Float.parseFloat(inputString);
+                            if(floatin <= 0.0f){
+                                throw new NumberFormatException();
+                            }
+
+                            ((Circle) mCurrentShape).radius = floatin * staticScale;
+
+                            mCurrentShape.invalidate();
+                            DataManager.saveAndOverwriteSingleShape(mCurrentShape);
+                        }
+                        catch(NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        alertDialog.setNegativeButton(R.string.default_cancel,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+    }
+
+    private void changeSquare(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(R.string.make_square_title);
+        alertDialog.setMessage(R.string.make_square_sub_title);
+        LinearLayout linLay = new LinearLayout(this);
+        linLay.setOrientation(LinearLayout.VERTICAL);
+
+
+
+        final EditText height = new EditText(this);
+        final EditText width = new EditText(this);
+        height.setHint("" + ((Square) mCurrentShape).height/staticScale);
+        width.setHint("" + ((Square) mCurrentShape).width/staticScale);
+        //height
+        height.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        height.setLayoutParams(lp);
+
+        linLay.addView(height);
+        linLay.addView(width);
+
+        //width
+        width.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        width.setLayoutParams(lp);
+
+        alertDialog.setPositiveButton(R.string.default_enter,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String lengthString = height.getText().toString();
+                        String widthString = width.getText().toString();
+                        float floathei;
+                        float floatwid;
+                        try {
+                            floathei = Float.parseFloat(lengthString);
+                            floatwid = Float.parseFloat(widthString);
+                            if(floathei <= 0.0f || floatwid <= 0.0f){
+                                throw new NumberFormatException();
+                            }
+                            ((Square) mCurrentShape).width = floatwid * staticScale;
+                            ((Square) mCurrentShape).height = floathei * staticScale;
+
+                            mCurrentShape.invalidate();
+                            DataManager.saveAndOverwriteSingleShape(mCurrentShape);
+
+                        }
+                        catch(NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        alertDialog.setNegativeButton(R.string.default_cancel,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        alertDialog.setView(linLay);
+        alertDialog.show();
+    }
+
+    private void changeLine() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(R.string.change_line_title);
+        alertDialog.setMessage(R.string.make_line_sub);
+
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+
+        boolean isVertical = (mCurrentShape.x == ((Line) mCurrentShape).x2);
+        String hint = (isVertical) ? "" + Math.abs(mCurrentShape.getY()-((Line) mCurrentShape).y2)/staticScale : "" + Math.abs(mCurrentShape.getX()-((Line) mCurrentShape).x2)/staticScale;
+        input.setHint(hint);
+
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton(R.string.default_enter,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String inputString = input.getText().toString();
+                        float floatin;
+                        try {
+                            floatin = Float.parseFloat(inputString);
+                            if(floatin < 0.0f){
+                                throw new NumberFormatException();
+                            }
+                            float length = floatin * staticScale;
+                            boolean isVertical = (mCurrentShape.x == ((Line) mCurrentShape).x2);
+                            ((Line) mCurrentShape).x2 = (isVertical) ? mCurrentShape.getX() : mCurrentShape.getX()+length;
+                            ((Line) mCurrentShape).y2 = (isVertical) ? mCurrentShape.getY()+length : mCurrentShape.getY();
+
+                            mCurrentShape.invalidate();
+                            DataManager.saveAndOverwriteSingleShape(mCurrentShape);
+
+
+                        }
+                        catch(NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        alertDialog.setNegativeButton(R.string.default_cancel,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
     }
 
     private void addDialog(){
@@ -115,22 +299,20 @@ public class SketchActivity extends Activity{
                 switch (which) {
                     case 0:
                         addCircle();
-                        System.out.println("case 0: Circle");
-                        //Circle ...
-                        break;
+                        //Circle
+                        return;
                     case 1:
                         addSquare();
-                        System.out.println("case 1: Square");
                         //Square
-                        break;
+                        return;
                     case 2:
-                        addVLine();
-                        //HLine
-                        break;
-                    case 3:
                         addHLine();
+                        //HLine
+                        return;
+                    case 3:
+                        addVLine();
                         //VLine
-                        break;
+                        return;
                 }
             }
         });
@@ -154,14 +336,14 @@ public class SketchActivity extends Activity{
         input.setHint(R.string.make_circle_hint);
         alertDialog.setView(input);
 
-        alertDialog.setPositiveButton(R.string.default_yes,
+        alertDialog.setPositiveButton(R.string.default_enter,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String inputString = input.getText().toString();
                         float floatin;
                         try {
                             floatin = Float.parseFloat(inputString);
-                            if(floatin < 0.0f){
+                            if(floatin <= 0.0f){
                                 throw new NumberFormatException();
                             }
                             float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
@@ -172,7 +354,7 @@ public class SketchActivity extends Activity{
                         }
                     }
                 });
-        alertDialog.setNegativeButton(R.string.default_no,
+        alertDialog.setNegativeButton(R.string.default_cancel,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -211,7 +393,7 @@ public class SketchActivity extends Activity{
 
 
 
-        alertDialog.setPositiveButton(R.string.default_yes,
+        alertDialog.setPositiveButton(R.string.default_enter,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String lengthString = height.getText().toString();
@@ -233,7 +415,7 @@ public class SketchActivity extends Activity{
                         }
                     }
                 });
-        alertDialog.setNegativeButton(R.string.default_no,
+        alertDialog.setNegativeButton(R.string.default_cancel,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -258,7 +440,7 @@ public class SketchActivity extends Activity{
         input.setHint(R.string.make_line_hint);
         alertDialog.setView(input);
 
-        alertDialog.setPositiveButton(R.string.default_yes,
+        alertDialog.setPositiveButton(R.string.default_enter,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String inputString = input.getText().toString();
@@ -269,14 +451,14 @@ public class SketchActivity extends Activity{
                                 throw new NumberFormatException();
                             }
                             float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
-                            makeNewLine(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale,true,true);
+                            makeNewLine(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale, true, true);
                         }
                         catch(NumberFormatException e) {
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
-        alertDialog.setNegativeButton(R.string.default_no,
+        alertDialog.setNegativeButton(R.string.default_cancel,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -301,7 +483,7 @@ public class SketchActivity extends Activity{
         input.setHint(R.string.make_line_hint);
         alertDialog.setView(input);
 
-        alertDialog.setPositiveButton(R.string.default_yes,
+        alertDialog.setPositiveButton(R.string.default_enter,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String inputString = input.getText().toString();
@@ -319,7 +501,7 @@ public class SketchActivity extends Activity{
                         }
                     }
                 });
-        alertDialog.setNegativeButton(R.string.default_no,
+        alertDialog.setNegativeButton(R.string.default_cancel,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -367,7 +549,7 @@ public class SketchActivity extends Activity{
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         mCurrentProject = savedInstanceState.getString(KEY_PROJECT_NAME);
         int uniqueID = savedInstanceState.getInt(KEY_CURRENT_SHAPE);
-        mCurrentShape = (uniqueID != -1) ? DataManager.loafSingleFile(getApplicationContext(), mCurrentProject, uniqueID, false) : null;
+        mCurrentShape = (uniqueID != -1) ? DataManager.loadSingleFile(getApplicationContext(), mCurrentProject, uniqueID, false) : null;
         mScaleFactor = savedInstanceState.getFloat(KEY_SCALE_FACTOR);
         float[] touchCoords = savedInstanceState.getFloatArray(KEY_LAST_TOUCH);
         assert touchCoords != null;
@@ -431,21 +613,18 @@ public class SketchActivity extends Activity{
 
                 if(temp != null) {
                     if(mCurrentShape != null){
-                        mCurrentShape.setStrokeWidthandColor(Shapes.COLOR_STANARD,Shapes.STROKE_WIDTH_STANDARD);
+                        mCurrentShape.setStrokeWidthandColor(Shapes.COLOR_STANDARD,Shapes.STROKE_WIDTH_STANDARD);
                     }
                     mCurrentShape = temp;
                     mCurrentShape.setStrokeWidthandColor(Shapes.COlOR_SELECTED, Shapes.STROKE_WIDTH_SELECTED);
 
-                } else if(mCurrentShape != null) {
-                    mCurrentShape.setStrokeWidthandColor(Shapes.COLOR_STANARD,Shapes.STROKE_WIDTH_STANDARD);
+                }
+                else if(mCurrentShape != null) {
+                    mCurrentShape.setStrokeWidthandColor(Shapes.COLOR_STANDARD,Shapes.STROKE_WIDTH_STANDARD);
                     mCurrentShape = null;
                 }
 
-                for (int i = 0; i < mFrame.getChildCount(); i++) {
-                    View currentView = mFrame.getChildAt(i);
-                    ((Shapes) currentView).setMatrix(matrix);
-                    currentView.invalidate();
-                }
+                renderAll();
 
                 break;
             }
@@ -478,17 +657,13 @@ public class SketchActivity extends Activity{
             if (!mScaleGestureDetector.isInProgress()) {
 
                 if(mCurrentShape != null){
-                    mCurrentShape.Move(distanceX / mScaleFactor, distanceY / mScaleFactor);
+                    mCurrentShape.move(distanceX / mScaleFactor, distanceY / mScaleFactor);
                 }
                 else{
                     matrix.postTranslate(-distanceX,-distanceY);
                 }
 
-                for (int i = 0; i < mFrame.getChildCount(); i++) {
-                    View currentView = mFrame.getChildAt(i);
-                    ((Shapes) currentView).setMatrix(matrix);
-                    currentView.invalidate();
-                }
+                renderAll();
 
 
             }
@@ -512,7 +687,7 @@ public class SketchActivity extends Activity{
 
             float newScale = mScaleFactor * detector.getScaleFactor();
 
-            if(0.1 < newScale && newScale < 5.0f) {
+            if(MIN_SCALE < newScale && newScale < MAX_SCALE) {
 
                 mScaleFactor *= detector.getScaleFactor();
 
@@ -529,13 +704,17 @@ public class SketchActivity extends Activity{
             lastTouchX = focusX;
             lastTouchY = focusY;
 
+            renderAll();
 
-            for (int i = 0; i < mFrame.getChildCount(); i++) {
-                View currentView = mFrame.getChildAt(i);
-                ((Shapes) currentView).setMatrix(matrix);
-                currentView.invalidate();
-            }
             return true;
+        }
+    }
+
+    private void renderAll(){
+        for (int i = 0; i < mFrame.getChildCount(); i++) {
+            View currentView = mFrame.getChildAt(i);
+            ((Shapes) currentView).setMatrix(matrix);
+            currentView.invalidate();
         }
     }
 

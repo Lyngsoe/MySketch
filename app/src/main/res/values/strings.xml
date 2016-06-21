@@ -37,13 +37,17 @@
     <string name="make_line_sub">Enter length of line.</string>
     <string name="make_line_hint">length</string>
 
+    <string name="change_circle_title">Change Selected Circle</string>
+    <string name="change_square_title">Change Selected Square</string>
+    <string name="change_line_title">Change Selected Line</string>
+
     <string name="invalid_input">Invalid input.</string>
 
     <string-array name="add_types">
         <item> Circle </item>
         <item> Square </item>
-        <item> HLine </item>
-        <item> VLine </item>
+        <item> Horizontal Line </item>
+        <item> Vertical Line </item>
 
 
     </string-array>

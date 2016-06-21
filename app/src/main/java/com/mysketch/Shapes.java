@@ -7,9 +7,9 @@ import android.view.View;
 
 public abstract class Shapes extends View {
 
-    static float STROKE_WIDTH_STANDARD = 10f;
-    static float STROKE_WIDTH_SELECTED = 25f;
-    static int COLOR_STANARD = android.graphics.Color.BLACK;
+    static float STROKE_WIDTH_STANDARD = 20f;
+    static float STROKE_WIDTH_SELECTED = 30f;
+    static int COLOR_STANDARD = android.graphics.Color.BLACK;
     static int COlOR_SELECTED = android.graphics.Color.RED;
 
 
@@ -31,7 +31,7 @@ public abstract class Shapes extends View {
         this.strokeWidth = strokeWidth;
     }
 
-    public void Move(float dx, float dy) {
+    public void move(float dx, float dy) {
         this.x -= dx;
         this.y -= dy;
     }
