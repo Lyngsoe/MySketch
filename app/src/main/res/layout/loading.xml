@@ -25,6 +25,6 @@
         android:id="@+id/imageView"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/logo3" />
+        android:src="@drawable/logo_big" />
 
 </RelativeLayout>

@@ -38,11 +38,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.mysketch.SetupProject"
-           android:theme="@style/AppTheme.CustomTheme" >
-
-        </activity>
-
 
     </application>
 

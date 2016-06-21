@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -15,13 +16,16 @@ import android.widget.Toast;
 
 import com.example.benjamin.git.MySketch.R;
 
+import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity {
 
     static final String PROJECT_NAME_KEY = "currentProject";
-    static final String SAVE_DIALOG_STATE_KEY = "mDialogState";
 
-    int mDialogState = 0;
+    private static final String SAVE_DIALOG_STATE_KEY = "mDialogState";
+
+    private int mDialogState = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,109 +56,118 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeNewProject() {
 
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-        alertBuilder.setTitle("New Project");
-        alertBuilder.setMessage("Enter Title of New Project:");
-
         final EditText input = new EditText(getApplicationContext());
         input.setTextColor(Color.BLACK);
         input.setText("");
 
-        alertBuilder.setView(input);
+        new AlertDialog.Builder(this)
+            .setTitle(getResources().getString(R.string.new_project_title))
+            .setMessage(" ") //padding
+            .setView(input)
+            .setPositiveButton(R.string.default_enter, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    String title = input.getEditableText().toString();
+                    if(!DataManager.newProject(title)){
+                        Toast.makeText(getApplicationContext(),"\""+title+"\" "+getResources().getString(R.string.project_name_unavailable),Toast.LENGTH_SHORT).show();
+                        dialog.cancel();
+                        makeNewProject();
+                        return;
+                    }
+                    Intent loadNew = new Intent(MainActivity.this, SketchActivity.class);
+                    loadNew.putExtra(PROJECT_NAME_KEY, title);
+                    startActivity(loadNew);
+                    Toast.makeText(getApplicationContext(),"\""+title+"\" "+getResources().getString(R.string.project_created),Toast.LENGTH_SHORT).show();
 
-        alertBuilder.setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String title = input.getEditableText().toString();
-                if(!DataManager.newProject(title)){
-                    Toast.makeText(getApplicationContext(),"The Title \""+title+"\" Is Already In Use.",Toast.LENGTH_SHORT).show();
-                    dialog.cancel();
-                    makeNewProject();
-                    return;
+                    mDialogState = 0;
+                }})
+            .setNegativeButton(R.string.default_cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    mDialogState = 0;
+                }})
+            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                public void onDismiss(DialogInterface dialog) {
+                    mDialogState = 0;
+                }})
+            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    mDialogState = 0;
                 }
-                Intent loadNew = new Intent(MainActivity.this, SketchActivity.class);
-                loadNew.putExtra(PROJECT_NAME_KEY, title);
-                startActivity(loadNew);
-                Toast.makeText(getApplicationContext(),"\""+title+"\" Created.",Toast.LENGTH_SHORT).show();
+            })
+            .show();
 
-                mDialogState = 0;
-            }
-        });
-        alertBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                dialog.cancel();
-
-                mDialogState = 0;
-            }
-        });
-        alertBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                mDialogState = 0;
-            }
-        });
-        alertBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                mDialogState = 0;
-            }
-        });
-        AlertDialog alertDialog = alertBuilder.create();
-        alertDialog.show();
         mDialogState = 1;
     }
 
     private void showFileChooser() {
+        final ArrayList<String> items = DataManager.getAllNamesOfProjects();
 
-        final String items[] = DataManager.getAllNamesOfProjects();
+        if(items != null && items.size() > 0) {
 
-        if(items != null && items.length > 0) {
+            final ArrayAdapter<String> arrayAdapterItems = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, items);
 
-            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-            alertBuilder.setTitle("Select Project to Load.\n"+DataManager.DIR);
-            alertBuilder.setItems(items, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int position) {
-                    String title = items[position];
-                    Intent load = new Intent(MainActivity.this, SketchActivity.class);
-                    load.putExtra(PROJECT_NAME_KEY, title);
-                    startActivity(load);
-                    Toast.makeText(getApplicationContext(),"\""+title+"\" Loaded.",Toast.LENGTH_SHORT).show();
-                    mDialogState = 0;
-                }
-            });
-            alertBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    mDialogState = 0;
-                }
-            });
-            alertBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    mDialogState = 0;
-                }
-            });
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
+                .setTitle(getResources().getString(R.string.load_project_title))
+                .setAdapter(arrayAdapterItems, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int position) {
+                        String title = items.get(position);
+                        Intent load = new Intent(MainActivity.this, SketchActivity.class);
+                        load.putExtra(PROJECT_NAME_KEY, title);
+                        startActivity(load);
+                        Toast.makeText(getApplicationContext(), "\"" + title + "\" " + getResources().getString(R.string.project_loaded), Toast.LENGTH_SHORT).show();
+                        mDialogState = 0;
+                    }
+                })
+                .setPositiveButton(R.string.default_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        mDialogState = 0;
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    public void onDismiss(DialogInterface dialog) {
+                        mDialogState = 0;
+                    }
+                })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    public void onCancel(DialogInterface dialog) {
+                        mDialogState = 0;
+                    }
+                });
             final AlertDialog alertDialog = alertBuilder.create();
             alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dialog) {
-                    final ListView lv = alertDialog.getListView();
-                    lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                        @Override
-                        public boolean onItemLongClick(final AdapterView<?> parent, View view, final int position, long id) {
-                            DataManager.deleteProject(items[position]);
-                            alertDialog.dismiss();
-                            showFileChooser();
-                            return true;
-                        }
-                    });
-                }
-            });
+                    public void onShow(DialogInterface dialog) {
+                        final ListView lv = alertDialog.getListView();
+                        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                            @Override
+                            public boolean onItemLongClick(final AdapterView<?> parent, View view, final int position, long id) {
+                                new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle(getResources().getString(R.string.delete_project_title))
+                                    .setMessage(getResources().getString(R.string.delete_project_sub_title)+" \""+items.get(position)+"\"?")
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            DataManager.deleteProject(items.get(position));
+                                            Toast.makeText(getApplicationContext(), "\"" + items.get(position) + "\" " + getResources().getString(R.string.project_deleted), Toast.LENGTH_SHORT).show();
+                                            items.remove(position);
+                                            arrayAdapterItems.notifyDataSetChanged();
+                                            if(items.size() == 0){
+                                                alertDialog.dismiss();
+                                            }
+                                        }
+                                    })
+                                    .setNegativeButton(android.R.string.no, null)
+                                    .show();
+                                return true;
+                            }
+                        });
+                    }
+                });
             alertDialog.show();
+
             mDialogState = 2;
         }
         else{
-            Toast.makeText(getApplicationContext(), "No Project(s) Found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.no_projects_found, Toast.LENGTH_SHORT).show();
         }
     }
 
