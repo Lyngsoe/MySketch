@@ -40,12 +40,13 @@ import java.util.ArrayList;
 public class DataManager {
 
     private static final String LOGTAG = "DataManager";
+
     static String DOWNLIOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     static String DIR = Environment.getExternalStorageDirectory().getAbsolutePath()+"/MySketch/Saves/";
     static final String FILE_TYPE = ".shape";
 
     //Used when choosing with project to open / delete
-    public static String[] getAllNamesOfProjects(){
+    public static ArrayList<String> getAllNamesOfProjects(){
         File[] allFiles = new File(DIR).listFiles();
         if(allFiles != null && allFiles.length > 0) {
             ArrayList<String> allProjects = new ArrayList<>();
@@ -54,7 +55,7 @@ public class DataManager {
                     allProjects.add(file.getName());
                 }
             }
-            return allProjects.toArray(new String[allProjects.size()]);
+            return allProjects;
         }
         Log.w(LOGTAG, "No Projects in directory/folder \""+DIR+"\"");
         return null;
@@ -147,6 +148,7 @@ public class DataManager {
         return true;
     }
 
+    //Saves a single Shapes type object
     public static boolean saveAndOverwriteSingleShape(Shapes source) {
         return saveAndOverwriteSingleShape(new ShapeWrapper().setup(source));
     }
@@ -185,14 +187,16 @@ public class DataManager {
         return false;
     }
 
-
     //Loads all shapes in projects directory, and boolean decides to delete or not.
-    public static Shapes[] loadAllShapes(Context context, String projectName, boolean instance, boolean delete){
+    public static Shapes[] loadAllShapes(Context context, String projectName, boolean delete){
         ShapeWrapper[] wrappers = loadAllShapes(projectName, delete);
         if(wrappers != null && wrappers.length > 0){
             Shapes[] shapes = new Shapes[wrappers.length];
             for(int i = 0; i < wrappers.length; i++){
-                shapes[i] = wrappers[i].convert(context, instance);
+                shapes[i] = wrappers[i].convert(context);
+
+                //Updates uniqueID for recycling
+                shapes[i].uniqueID = i;
             }
             return shapes;
         }
@@ -219,6 +223,10 @@ public class DataManager {
         return returnArray;
     }
 
+    //loads a single file
+    public static Shapes loafSingleFile(Context context, String projectName, int uniqueID, boolean delete){
+        return loadSingleFile(new File(DIR+projectName, uniqueID + FILE_TYPE), delete).convert(context);
+    }
     private static ShapeWrapper loadSingleFile(File file, boolean delete){
         if(!file.exists()){
             Log.e(LOGTAG, "No file found at \""+file.getAbsolutePath()+"\"");
@@ -301,69 +309,74 @@ public class DataManager {
     }
 
     private static class ShapeWrapper implements Serializable {
-        //Shapes
+        //Common values
         String projectName;
         int uniqueID;
         String shapeType;
         float x;
         float y;
-        float drawX;
-        float drawY;
+        float strokeWidth;
+        int Color;
 
         //Circle
         float radius;
 
         //Square
-        float w;
-        float h;
+        float width;
+        float height;
+
+        //Line
+        float x2;
+        float y2;
 
         ShapeWrapper(){}
 
         ShapeWrapper setup(Shapes source){
             projectName = source.projectName;
-            uniqueID = source.uniqueID;
             shapeType = source.shapeType;
-            x = source.x;
-            y = source.y;
-            drawX = source.drawX;
-            drawY = source.drawY;
+            uniqueID = source.uniqueID;
+            x = source.getX();
+            y = source.getY();
+            strokeWidth = source.getStrokeWidth();
 
             switch (shapeType){
-                case "CIRCLE":{
+                case Circle.SHAPE_TYPE:{
                     radius = ((Circle) source).radius;
                     break;
                 }
-                case "SQUARE":{
-                    w = ((Square) source).w;
-                    h = ((Square) source).h;
+                case Square.SHAPE_TYPE:{
+                    width = ((Square) source).width;
+                    height = ((Square) source).height;
                     break;
                 }
-                default: break;
+                case Line.SHAPE_TYPE:{
+                    x2 = ((Line) source).x2;
+                    y2 = ((Line) source).y2;
+                    break;
+                }
             }
 
             return this;
         }
 
-        Shapes convert(Context context, boolean instance){
+        Shapes convert(Context context){
             Shapes output;
             switch(this.shapeType){
-                case "CIRCLE":{
-                    output = new Circle(context, this.projectName, instance, this.x, this.y, this.radius);
+                case Circle.SHAPE_TYPE:{
+                    output = new Circle(context, this.projectName, this.x, this.y, this.strokeWidth, this.radius);
                     break;
                 }
-                case "SQUARE":{
-                    output = new Square(context, this.projectName, instance, this.w, this.h, this.x, this.y);
+                case Square.SHAPE_TYPE:{
+                    output = new Square(context, this.projectName, this.x, this.y, this.strokeWidth, this.width, this.height);
+                    break;
+                }
+                case Line.SHAPE_TYPE:{
+                    output = new Line(context, this.projectName, this.x, this.y, this.strokeWidth, this.x2, this.y2);
                     break;
                 }
                 default: return null;
             }
-            output.projectName = this.projectName;
             output.uniqueID = this.uniqueID;
-            output.shapeType = this.shapeType;
-            output.drawX = this.drawX;
-            output.drawY = this.drawY;
-            output.x = this.x;
-            output.y = this.y;
 
             /*
             Log.i("save", output.shapeType+" : load");
