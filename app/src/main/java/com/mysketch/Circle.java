@@ -36,6 +36,11 @@ public class Circle extends Shapes {
 
         canvas.restore();
     }
+    @Override
+    public void setStrokeWidthandColor(int Color, float Stroke){
+        mPainter.setColor(Color);
+        mPainter.setStrokeWidth(Stroke);
+    }
 
     @Override
     public boolean Intersects(float x, float y) {
