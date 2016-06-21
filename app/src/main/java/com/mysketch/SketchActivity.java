@@ -204,12 +204,12 @@ public class SketchActivity extends Activity{
         alertDialog.setPositiveButton(R.string.default_enter,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        String lengthString = height.getText().toString();
+                        String heightString = height.getText().toString();
                         String widthString = width.getText().toString();
                         float floathei;
                         float floatwid;
                         try {
-                            floathei = Float.parseFloat(lengthString);
+                            floathei = Float.parseFloat(heightString);
                             floatwid = Float.parseFloat(widthString);
                             if(floathei <= 0.0f || floatwid <= 0.0f){
                                 throw new NumberFormatException();
@@ -398,16 +398,16 @@ public class SketchActivity extends Activity{
                     public void onClick(DialogInterface dialog, int which) {
                         String lengthString = height.getText().toString();
                         String widthString = width.getText().toString();
-                        float floatlen;
+                        float floathei;
                         float floatwid;
                         try {
-                            floatlen = Float.parseFloat(lengthString);
+                            floathei = Float.parseFloat(lengthString);
                             floatwid = Float.parseFloat(widthString);
-                            if(floatlen <= 0.0f || floatwid <= 0.0f){
+                            if(floathei <= 0.0f || floatwid <= 0.0f){
                                 throw new NumberFormatException();
                             }
                             float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
-                            makeNewSquare(newCoords[0], newCoords[1],Shapes.STROKE_WIDTH_STANDARD,floatlen*staticScale,floatwid*staticScale, true);
+                            makeNewSquare(newCoords[0], newCoords[1],Shapes.STROKE_WIDTH_STANDARD,floatwid*staticScale,floathei*staticScale, true);
 
                         }
                         catch(NumberFormatException e) {
