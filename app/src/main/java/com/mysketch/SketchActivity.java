@@ -139,8 +139,8 @@ public class SketchActivity extends Activity{
     }
     private void addCircle() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("radius of circle in staticScale");
-        alertDialog.setMessage("Enter text");
+        alertDialog.setTitle(R.string.make_cricle_title);
+        alertDialog.setMessage(R.string.make_circle_sub_title);
 
 
         final EditText input = new EditText(this);
@@ -149,9 +149,10 @@ public class SketchActivity extends Activity{
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
         input.setLayoutParams(lp);
+        input.setHint(R.string.make_circle_hint);
         alertDialog.setView(input);
 
-        alertDialog.setPositiveButton("YES",
+        alertDialog.setPositiveButton(R.string.default_yes,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String inputString = input.getText().toString();
@@ -169,7 +170,7 @@ public class SketchActivity extends Activity{
                         }
                     }
                 });
-        alertDialog.setNegativeButton("NO",
+        alertDialog.setNegativeButton(R.string.default_no,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -181,24 +182,25 @@ public class SketchActivity extends Activity{
 
     public void addSquare(){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("sidelengths of square in meters");
+        alertDialog.setTitle(R.string.make_square_title);
+        alertDialog.setMessage(R.string.make_square_sub_title);
         LinearLayout linLay = new LinearLayout(this);
         linLay.setOrientation(LinearLayout.VERTICAL);
 
 
 
-        final EditText length = new EditText(this);
+        final EditText height = new EditText(this);
         final EditText width = new EditText(this);
-        length.setHint("length");
-        width.setHint("width");
+        height.setHint(R.string.make_square_hint_heigth);
+        width.setHint(R.string.make_square_hint_width);
         //length
-        length.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        height.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
-        length.setLayoutParams(lp);
+        height.setLayoutParams(lp);
 
-        linLay.addView(length);
+        linLay.addView(height);
         linLay.addView(width);
 
         //width
@@ -207,10 +209,10 @@ public class SketchActivity extends Activity{
 
 
 
-        alertDialog.setPositiveButton("YES",
+        alertDialog.setPositiveButton(R.string.default_yes,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        String lengthString = length.getText().toString();
+                        String lengthString = height.getText().toString();
                         String widthString = width.getText().toString();
                         float floatlen;
                         float floatwid;
@@ -229,7 +231,7 @@ public class SketchActivity extends Activity{
                         }
                     }
                 });
-        alertDialog.setNegativeButton("NO",
+        alertDialog.setNegativeButton(R.string.default_no,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -401,18 +403,21 @@ public class SketchActivity extends Activity{
             float focusX = detector.getFocusX();
             float focusY = detector.getFocusY();
 
-            //Sætter Scalefactor
-            mScaleFactor *= detector.getScaleFactor();
-            mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
+            float newScale = mScaleFactor * detector.getScaleFactor();
 
-            transformationMatrix.postTranslate(-focusX, -focusY);
-            transformationMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor());
+            if(0.1 < newScale && newScale < 5.0f) {
 
-            float dx = focusX-lastTouchX;
-            float dy = focusY-lastTouchY;
+                mScaleFactor *= detector.getScaleFactor();
 
-            transformationMatrix.postTranslate(focusX + dx, focusY + dy);
-            matrix.postConcat(transformationMatrix);
+                transformationMatrix.postTranslate(-focusX, -focusY);
+                transformationMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor());
+
+                float dx = focusX - lastTouchX;
+                float dy = focusY - lastTouchY;
+
+                transformationMatrix.postTranslate(focusX + dx, focusY + dy);
+                matrix.postConcat(transformationMatrix);
+            }
 
             lastTouchX = focusX;
             lastTouchY = focusY;
