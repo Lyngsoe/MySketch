@@ -2,56 +2,50 @@ package com.mysketch;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 
-/**
- * Created by Sean on 16-06-2016.
- */
 public class Circle extends Shapes {
+
+    private final static String LOGTAG = "Circle";
 
     final static String SHAPE_TYPE = "CIRCLE";
 
-    final static String LOGTAG = "Circle";
-    final static float STROKE_WIDTH = 4.5f;
-
     private final Paint mPainter = new Paint();
+
     float radius;
 
 
-    public Circle(Context context, String projectName, boolean addInstance, float x, float y, float radius){
-        super(context, projectName, SHAPE_TYPE, addInstance, x, y);
+    public Circle(Context context, String projectName, float x, float y, float strokeWidth, float radius){
+        super(context, projectName, SHAPE_TYPE, x, y, strokeWidth);
+
         mPainter.setStyle(Paint.Style.STROKE);
-        mPainter.setStrokeWidth(STROKE_WIDTH);
+        mPainter.setStrokeWidth(strokeWidth);
+
         this.radius=radius;
 
-        if(addInstance){
-            DataManager.saveAndOverwriteSingleShape(this);
-        }
+        invalidate();
     }
+
     @Override
-    protected synchronized void onDraw(Canvas canvas) {
+    public synchronized void onDraw(Canvas canvas) {
 
         canvas.save();
 
-        canvas.setMatrix(m);
-        canvas.drawCircle(x-drawX,y-drawY,radius,mPainter);
-        //canvas.drawCircle(x-getTranslationX(),y-getTranslationY(),100,mPainter);
+        canvas.setMatrix(matrix);
+        canvas.drawCircle(x,y,radius,mPainter);
 
         canvas.restore();
     }
 
     @Override
     public boolean Intersects(float x, float y) {
-        float max = radius + STROKE_WIDTH/2;
-        float dist = (float) Math.sqrt(Math.pow(this.x-x, 2) + Math.pow(this.y-y, 2));
-        return dist < max;// - STROKE_WIDTH && dist < max;
-    }
+        float max = radius + strokeWidth/2;
+        float min = radius - strokeWidth/2;
+        float dist = (float) Math.hypot(this.x-x,this.y-y);
 
-    @Override
-    public void Move(float dx, float dy) {
-        this.x -= dx;
-        this.y -= dy;
-    }
+        //return min <= dist && dist <= max;
 
+        return dist <= max; //all figure
+
+    }
 }

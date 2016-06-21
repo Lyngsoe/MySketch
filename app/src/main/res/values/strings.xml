@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">MySketch</string>
+
+    <string name="default_cancel">CANCEL</string>
+    <string name="default_enter">ENTER</string>
+    <string name="default_ok">OK</string>
+
+    <!-- main activity -->
+    <string name="new_project_title">Enter title of new Project.</string>
+    <string name="project_name_unavailable">cannot be created.</string>
+    <string name="project_created">successfully created.</string>
+    <string name="load_project_title">Select Project to load.</string>
+    <string name="delete_project_title">Delete Project.</string>
+    <string name="delete_project_sub_title">Are you sure you want to delete</string>
+    <string name="project_deleted">successfully deleted.</string>
+    <string name="project_loaded">successfully loaded.</string>
+    <string name="no_projects_found">No Project(s) found.</string>
+
+    <!-- sketch activity -->
+    <string name="exit_title">Exit Project</string>
+    <string name="exit_sub_title">Are you sure you want to exit?</string>
+
+
 </resources>

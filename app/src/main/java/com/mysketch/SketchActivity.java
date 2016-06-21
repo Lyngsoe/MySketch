@@ -5,12 +5,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -33,32 +30,30 @@ public class SketchActivity extends Activity{
     private static final String TOUCH_TAG = "TouchEvents";
 
     private static final String KEY_PROJECT_NAME = "projectName_key";
+    private static final String KEY_CURRENT_SHAPE = "currentShape_key";
+    private static final String KEY_SCALE_FACTOR = "scaleFactor_key";
+    private static final String KEY_LAST_TOUCH = "lastTouch_key";
+    private static final String KEY_MATRIX = "matrix_key";
 
-    RelativeLayout mFrame;
+    private String mCurrentProject;
+    private Shapes mCurrentShape;
+    private float mScaleFactor;
+    private float lastTouchX;
+    private float lastTouchY;
+    private Matrix matrix;
 
-    Shapes mCurrentShape;
-    String mCurrentProject;
-    ArrayList<Shapes> shapesList = new ArrayList<>();
-
-
-    int mDisplayHeight;
-    int mDisplayWidth;
-    GestureDetectorCompat gestureListener;
-    ScaleGestureDetector mScaleGestureDetector;
-    float meter;
-    PointF screenPos = new PointF(0,0);
-    float mScaleFactor = 1;
-    boolean isRunning = false;
-    float lastTouchX;
-    float lastTouchY;
-    Matrix m;
-
-
+    private int mDisplayHeight;
+    private int mDisplayWidth;
+    private float staticScale;
+    private RelativeLayout mFrame;
+    private ArrayList<Shapes> shapesList = new ArrayList<>();
+    private GestureDetectorCompat gestureListener;
+    private ScaleGestureDetector mScaleGestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.frame);
+        setContentView(R.layout.activity_sketch);
 
         //Frame som indeholder alle views
         mFrame = (RelativeLayout) findViewById(R.id.frameSketch);
@@ -70,11 +65,10 @@ public class SketchActivity extends Activity{
         mDisplayHeight = size.y;
         mDisplayWidth = size.x;
 
-        //definition på meter
-        meter = mDisplayHeight/3;
-        m = new Matrix();
-        m.reset();
+        //definition på staticScale
+        staticScale = mDisplayHeight/3;
 
+        //listeners
         gestureListener = new GestureDetectorCompat(this, new MyGestureListener());
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
@@ -88,20 +82,25 @@ public class SketchActivity extends Activity{
             }
         });
 
+        //first instance of the sketchActivity only
+        if(savedInstanceState == null){
+            //opsætter matrix
+            matrix = new Matrix();
+            matrix.reset();
 
-        //Indstiller project der arbejdes med
-        mCurrentProject = getIntent().getStringExtra(MainActivity.PROJECT_NAME_KEY);
+            //scalesFactor
+            mScaleFactor = 1;
 
-        //Loader filer gemt under projectet
-        loadSavedData();
+            //Indstiller project der arbejdes med
+            mCurrentProject = getIntent().getStringExtra(MainActivity.PROJECT_NAME_KEY);
 
-        //Test
-        testDialog();
-
+            //Loader filer gemt under projectet
+            loadSavedData();
+        }
     }
     private void testDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("radius of circle in meter");
+        alertDialog.setTitle("radius of circle in staticScale");
         alertDialog.setMessage("Enter text");
 
         final EditText input = new EditText(this);
@@ -115,16 +114,14 @@ public class SketchActivity extends Activity{
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String inputString = input.getText().toString();
-                        float floatin = -1.0f;
+                        float floatin;
                         try {
                             floatin = Float.parseFloat(inputString);
-                            if(floatin <= 0.0f){
+                            if(floatin < 0.0f){
                                 throw new NumberFormatException();
                             }
-                            Shapes temp = new Circle(SketchActivity.this, mCurrentProject, true, screenPos.x,  screenPos.y, floatin*meter); //TODO make new stuff be drawn in the middle
-                            temp.setMatrix(m);
-                            mFrame.addView(temp);
-                            shapesList.add(0, temp);
+                            float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
+                            makeNewCircle(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale,true);
                         }
                         catch(NumberFormatException e) {
                             Toast.makeText(getApplicationContext(), "wrong input", Toast.LENGTH_SHORT).show();
@@ -146,13 +143,11 @@ public class SketchActivity extends Activity{
     public void onResume() {
         super.onResume();
         loadSavedData();
-        isRunning = true;
     }
 
     @Override
     public void onPause() {
         saveData();
-        isRunning = false;
         super.onPause();
     }
 
@@ -165,6 +160,13 @@ public class SketchActivity extends Activity{
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putString(KEY_PROJECT_NAME, mCurrentProject);
+        savedInstanceState.putInt(KEY_CURRENT_SHAPE, (mCurrentShape != null) ? mCurrentShape.uniqueID : -1);
+        savedInstanceState.putFloat(KEY_SCALE_FACTOR, mScaleFactor);
+        savedInstanceState.putFloatArray(KEY_LAST_TOUCH, new float[] {lastTouchX, lastTouchY});
+        float[] v = new float[9];
+        matrix.getValues(v);
+        savedInstanceState.putFloatArray(KEY_MATRIX, v);
+
         saveData();
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -172,6 +174,17 @@ public class SketchActivity extends Activity{
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         mCurrentProject = savedInstanceState.getString(KEY_PROJECT_NAME);
+        int uniqueID = savedInstanceState.getInt(KEY_CURRENT_SHAPE);
+        mCurrentShape = (uniqueID != -1) ? DataManager.loafSingleFile(getApplicationContext(), mCurrentProject, uniqueID, false) : null;
+        mScaleFactor = savedInstanceState.getFloat(KEY_SCALE_FACTOR);
+        float[] touchCoords = savedInstanceState.getFloatArray(KEY_LAST_TOUCH);
+        assert touchCoords != null;
+        lastTouchX = touchCoords[0];
+        lastTouchY = touchCoords[1];
+        float[] v = savedInstanceState.getFloatArray(KEY_MATRIX);
+        matrix = new Matrix();
+        matrix.setValues(v);
+
         loadSavedData();
         super.onRestoreInstanceState(savedInstanceState);
     }
@@ -185,14 +198,30 @@ public class SketchActivity extends Activity{
     private void loadSavedData(){
         shapesList = new ArrayList<>();
         mFrame.removeAllViews();
-        Shapes[] loadShapes = DataManager.loadAllShapes(getApplicationContext(), mCurrentProject, false, false);
+        Shapes[] loadShapes = DataManager.loadAllShapes(getApplicationContext(), mCurrentProject, false);
         if(loadShapes != null && loadShapes.length>0){
             for(Shapes shape : loadShapes){
-                shape.setMatrix(m);
+                shape.setMatrix(matrix);
                 shapesList.add(0, shape);
                 mFrame.addView(shape);
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+            .setTitle(getResources().getString(R.string.exit_title))
+            .setMessage(getResources().getString(R.string.exit_sub_title))
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    SketchActivity.super.onBackPressed();
+                }
+            })
+            .setNegativeButton(android.R.string.no, null)
+            .show();
     }
 
     public boolean onTouchEvent(MotionEvent event){
@@ -219,29 +248,12 @@ public class SketchActivity extends Activity{
     }
 
     public Shapes getIntersectingShape(float x, float y) {
-        //transforms x and y
-        Matrix minv = new Matrix();
-        m.invert(minv);
-        float[] v = new float[9];
-        m.getValues(v);
 
-        //calculations
-        float tx = v[Matrix.MTRANS_X];
-        float ty = v[Matrix.MTRANS_Y];
-
-        float coordx = (x - tx) / mScaleFactor;
-        float coordy = (y - ty) / mScaleFactor;
-
-
-
-
-        Log.i("Hej","Coord x: " + coordx + " Coord y: " +coordy);
-        Log.i("Hej","Scale factor: " + mScaleFactor);
+        float[] newCoords = transformCoordinate(new float[] {x,y});
 
         for(Shapes shape : shapesList){
 
-            if(shape.Intersects(coordx, coordy)){
-                Log.i("Hej","Shape x: " + shape.x + " Shape y: "+ shape.y);
+            if(shape.Intersects(newCoords[0], newCoords[1])){
                 return shape;
             }
         }
@@ -255,23 +267,17 @@ public class SketchActivity extends Activity{
             if (!mScaleGestureDetector.isInProgress()) {
 
                 if(mCurrentShape != null){
-                    //TODO scale x og y
-                    //transforms x and y
-
                     mCurrentShape.Move(distanceX / mScaleFactor, distanceY / mScaleFactor);
                 }
                 else{
-                    m.postTranslate(-distanceX,-distanceY);
+                    matrix.postTranslate(-distanceX,-distanceY);
                 }
 
                 for (int i = 0; i < mFrame.getChildCount(); i++) {
                     View currentView = mFrame.getChildAt(i);
-                    ((Shapes) currentView).setMatrix(m);
+                    ((Shapes) currentView).setMatrix(matrix);
                     currentView.invalidate();
                 }
-
-                String pos = (int) screenPos.x + " " + (int) screenPos.y;
-              //  Log.i(DEBUG_GESTURE_TAG, pos);
 
 
             }
@@ -292,9 +298,6 @@ public class SketchActivity extends Activity{
             Matrix transformationMatrix = new Matrix();
             float focusX = detector.getFocusX();
             float focusY = detector.getFocusY();
-           // Log.i(DEBUG_GESTURE_TAG,"entered onScale");
-            String scale = mScaleFactor+ " ";
-            //Log.i(DEBUG_GESTURE_TAG,scale);
 
             //Sætter Scalefactor
             mScaleFactor *= detector.getScaleFactor();
@@ -307,7 +310,7 @@ public class SketchActivity extends Activity{
             float dy = focusY-lastTouchY;
 
             transformationMatrix.postTranslate(focusX + dx, focusY + dy);
-            m.postConcat(transformationMatrix);
+            matrix.postConcat(transformationMatrix);
 
             lastTouchX = focusX;
             lastTouchY = focusY;
@@ -315,11 +318,54 @@ public class SketchActivity extends Activity{
 
             for (int i = 0; i < mFrame.getChildCount(); i++) {
                 View currentView = mFrame.getChildAt(i);
-                ((Shapes) currentView).setMatrix(m);
+                ((Shapes) currentView).setMatrix(matrix);
                 currentView.invalidate();
             }
             return true;
         }
+    }
+
+    private float[] transformCoordinate(float[] oldCoords){
+        //gets matrix values
+        float[] v = new float[9];
+        matrix.getValues(v);
+
+        //transformation
+        float tx = v[Matrix.MTRANS_X];
+        float ty = v[Matrix.MTRANS_Y];
+
+        //calculate new coords
+        float[] newCoords = {
+                (oldCoords[0] - tx) / mScaleFactor,
+                (oldCoords[1] - ty) / mScaleFactor,
+        };
+
+        return newCoords;
+    }
+
+    private Shapes makeNewSquare(float x, float y, float strokeWidth, float height, float width, boolean addInstance){
+        Shapes newSquare = new Square(getApplicationContext(), mCurrentProject, x, y, strokeWidth, height, width);
+        return addInstance ? addedInstance(newSquare) : newSquare;
+    }
+
+    private Shapes makeNewCircle(float x, float y, float strokeWidth, float radius, boolean addInstance){
+        Shapes newCircle = new Circle(getApplicationContext(), mCurrentProject, x, y, strokeWidth, radius);
+        return addInstance ? addedInstance(newCircle) : newCircle;
+    }
+
+    private Shapes makeNewLine(float x, float y, float strokeWidth, float x2, float y2, boolean addInstance){
+        Shapes newLine = new Line(getApplicationContext(), mCurrentProject, x, y, strokeWidth, x2, y2);
+        return addInstance ? addedInstance(newLine) : newLine;
+    }
+
+    private Shapes addedInstance(Shapes shape){
+        shape.uniqueID = DataManager.getUniqueID(mCurrentProject);
+        DataManager.saveAndOverwriteSingleShape(shape);
+        shape.setMatrix(matrix);
+        shapesList.add(0, shape);
+        mFrame.addView(shape);
+
+        return shape;
     }
 }
 
