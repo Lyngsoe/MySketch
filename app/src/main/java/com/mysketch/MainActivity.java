@@ -19,6 +19,17 @@ import com.example.benjamin.git.MySketch.R;
 import java.util.ArrayList;
 
 
+/***
+ * The MainActivity class contains the main options for the user when using MySketch.
+ * The user has two options; adding a new project or loading an existing one.
+ *
+ * Both options takes the user to the SketchActivity b
+ *
+ *
+ *
+ */
+
+
 public class MainActivity extends AppCompatActivity {
 
     static final String PROJECT_NAME_KEY = "currentProject";

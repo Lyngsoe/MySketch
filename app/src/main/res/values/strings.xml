@@ -23,14 +23,14 @@
     <string name="exit_title">Exit Project</string>
     <string name="exit_sub_title">Are you sure you want to exit?</string>
 
-    <string name="make_cricle_title">New Circle</string>
+    <string name="make_circle_title">New Circle</string>
     <string name="make_circle_sub_title">Enter radius of Circle.</string>
     <string name="make_circle_hint">radius</string>
 
     <string name="make_square_title">New Square</string>
     <string name="make_square_sub_title">Enter height and width of Square</string>
     <string name="make_square_hint_width">width</string>
-    <string name="make_square_hint_heigth">height</string>
+    <string name="make_square_hint_height">height</string>
 
     <string name="make_line_title_vertical">New Vertical Line</string>
     <string name="name_line_title_horizontal">New Horizontal Line</string>
@@ -42,7 +42,8 @@
     <string-array name="add_types">
         <item> Circle </item>
         <item> Square </item>
-        <item> Line </item>
+        <item> HLine </item>
+        <item> VLine </item>
 
 
     </string-array>

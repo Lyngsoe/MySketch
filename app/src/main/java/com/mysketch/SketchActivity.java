@@ -18,9 +18,7 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.example.benjamin.git.MySketch.R;
@@ -126,8 +124,12 @@ public class SketchActivity extends Activity{
                         //Square
                         break;
                     case 2:
-                        //addLine();
-                        //Line
+                        addVLine();
+                        //HLine
+                        break;
+                    case 3:
+                        addHLine();
+                        //VLine
                         break;
                 }
             }
@@ -139,7 +141,7 @@ public class SketchActivity extends Activity{
     }
     private void addCircle() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle(R.string.make_cricle_title);
+        alertDialog.setTitle(R.string.make_circle_title);
         alertDialog.setMessage(R.string.make_circle_sub_title);
 
 
@@ -191,7 +193,7 @@ public class SketchActivity extends Activity{
 
         final EditText height = new EditText(this);
         final EditText width = new EditText(this);
-        height.setHint(R.string.make_square_hint_heigth);
+        height.setHint(R.string.make_square_hint_height);
         width.setHint(R.string.make_square_hint_width);
         //height
         height.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -241,6 +243,92 @@ public class SketchActivity extends Activity{
         alertDialog.show();
 
     }
+    private void addVLine() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(R.string.make_line_title_vertical);
+        alertDialog.setMessage(R.string.make_line_sub);
+
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        input.setHint(R.string.make_line_hint);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton(R.string.default_yes,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String inputString = input.getText().toString();
+                        float floatin;
+                        try {
+                            floatin = Float.parseFloat(inputString);
+                            if(floatin < 0.0f){
+                                throw new NumberFormatException();
+                            }
+                            float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
+                            makeNewLine(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale,true,true);
+                        }
+                        catch(NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        alertDialog.setNegativeButton(R.string.default_no,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+    }
+
+    private void addHLine() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle(R.string.name_line_title_horizontal);
+        alertDialog.setMessage(R.string.make_line_sub);
+
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        input.setHint(R.string.make_line_hint);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton(R.string.default_yes,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String inputString = input.getText().toString();
+                        float floatin;
+                        try {
+                            floatin = Float.parseFloat(inputString);
+                            if(floatin < 0.0f){
+                                throw new NumberFormatException();
+                            }
+                            float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
+                            makeNewLine(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale,false,true);
+                        }
+                        catch(NumberFormatException e) {
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        alertDialog.setNegativeButton(R.string.default_no,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+    }
+
 
 
     @Override
