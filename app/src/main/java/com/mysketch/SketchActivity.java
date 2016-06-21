@@ -176,7 +176,7 @@ public class SketchActivity extends Activity{
 
     private void changeSquare(){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle(R.string.make_square_title);
+        alertDialog.setTitle(R.string.change_square_title);
         alertDialog.setMessage(R.string.make_square_sub_title);
         LinearLayout linLay = new LinearLayout(this);
         linLay.setOrientation(LinearLayout.VERTICAL);
