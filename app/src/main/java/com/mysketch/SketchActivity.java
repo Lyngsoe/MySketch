@@ -451,7 +451,7 @@ public class SketchActivity extends Activity{
     }
 
     private Shapes makeNewSquare(float x, float y, float strokeWidth, float height, float width, boolean addInstance){
-        Shapes newSquare = new Square(getApplicationContext(), mCurrentProject, x, y, strokeWidth, height, width);
+        Shapes newSquare = new Square(getApplicationContext(), mCurrentProject, x-height/2, y-width/2, strokeWidth, height, width);
         return addInstance ? addedInstance(newSquare) : newSquare;
     }
 
