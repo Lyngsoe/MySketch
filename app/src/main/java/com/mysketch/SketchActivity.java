@@ -338,7 +338,26 @@ public class SketchActivity extends Activity{
             case MotionEvent.ACTION_DOWN: {
                 Log.i(TOUCH_TAG,"Action down!");
 
-                mCurrentShape = getIntersectingShape(event.getX(), event.getY());
+                Shapes temp = getIntersectingShape(event.getX(), event.getY());
+
+
+                if(temp != null) {
+                    if(mCurrentShape != null){
+                        mCurrentShape.setStrokeWidthandColor(Shapes.COLOR_STANARD,Shapes.STROKE_WIDTH_STANDARD);
+                    }
+                    mCurrentShape = temp;
+                    mCurrentShape.setStrokeWidthandColor(Shapes.COlOR_SELECTED, Shapes.STROKE_WIDTH_SELECTED);
+
+                } else if(mCurrentShape != null) {
+                    mCurrentShape.setStrokeWidthandColor(Shapes.COLOR_STANARD,Shapes.STROKE_WIDTH_STANDARD);
+                    mCurrentShape = null;
+                }
+
+                for (int i = 0; i < mFrame.getChildCount(); i++) {
+                    View currentView = mFrame.getChildAt(i);
+                    ((Shapes) currentView).setMatrix(matrix);
+                    currentView.invalidate();
+                }
 
                 break;
             }

@@ -8,6 +8,10 @@ import android.view.View;
 public abstract class Shapes extends View {
 
     static float STROKE_WIDTH_STANDARD = 10f;
+    static float STROKE_WIDTH_SELECTED = 25f;
+    static int COLOR_STANARD = android.graphics.Color.BLACK;
+    static int COlOR_SELECTED = android.graphics.Color.RED;
+
 
     protected Matrix matrix;
     protected float x;
@@ -49,13 +53,11 @@ public abstract class Shapes extends View {
         return strokeWidth;
     }
 
-    public void setStrokeWidth(float strokeWidth){
-        this.strokeWidth = strokeWidth;
-    }
-
     public void setMatrix(Matrix matrix){
         this.matrix = matrix;
     }
+
+    public abstract void setStrokeWidthandColor(int Color,float strokeWidth);
 
     @Override
     public abstract void onDraw(Canvas canvas);

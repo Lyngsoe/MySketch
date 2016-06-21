@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 
 public class Square extends Shapes {
 
@@ -12,6 +13,8 @@ public class Square extends Shapes {
     final static String SHAPE_TYPE = "SQUARE";
 
     private Paint mPainter = new Paint();
+
+    private RectF r = new RectF();
 
     float height;
     float width;
@@ -35,6 +38,7 @@ public class Square extends Shapes {
 
         canvas.save();
 
+        canvas.drawRect(r,mPainter);
         canvas.setMatrix(matrix);
         canvas.drawLine(x,y,x+ width,y, mPainter);
         canvas.drawLine(x,y,x,y+ height, mPainter);
@@ -46,6 +50,13 @@ public class Square extends Shapes {
 
     @Override
     public boolean Intersects(float x, float y){
+
+        RectF interRec = new RectF();
+        interRec.set(x,y,x+width,y+height);
+
+        return r.intersect(interRec);
+
+        /*
         float xMax = this.x + strokeWidth/2;
         float xMin = xMax - strokeWidth;
         float yMax = this.y + strokeWidth/2;
@@ -66,6 +77,6 @@ public class Square extends Shapes {
         return (checkFor[0] || checkFor[1] || checkFor[2] || checkFor[3])
         */
 
-        return (xMin <= x && x <= xMax && yMin <= y && y <= yMax); //all figure
+       // return (xMin <= x && x <= xMax && yMin <= y && y <= yMax); //all figure
     }
 }
