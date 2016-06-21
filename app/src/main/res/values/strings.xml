@@ -32,8 +32,9 @@
     <string name="make_square_hint_width">width</string>
     <string name="make_square_hint_heigth">height</string>
 
-    <string name="make_line_title">New Line</string>
-    <string name="make_line_sub">Enter length of line and pick orientation.</string>
+    <string name="make_line_title_vertical">New Vertical Line</string>
+    <string name="name_line_title_horizontal">New Horizontal Line</string>
+    <string name="make_line_sub">Enter length of line.</string>
     <string name="make_line_hint">length</string>
 
     <string name="invalid_input">Invalid input.</string>
