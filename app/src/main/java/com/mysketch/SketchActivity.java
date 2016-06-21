@@ -402,18 +402,23 @@ public class SketchActivity extends Activity{
             float focusY = detector.getFocusY();
 
             //Sætter Scalefactor
-            mScaleFactor *= detector.getScaleFactor();
-            mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
+            float newScale = mScaleFactor * detector.getScaleFactor();
 
-            transformationMatrix.postTranslate(-focusX, -focusY);
-            transformationMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor());
+            if(newScale > 0.1f && newScale < 5.0f) {
 
-            float dx = focusX-lastTouchX;
-            float dy = focusY-lastTouchY;
+                mScaleFactor *= detector.getScaleFactor();
 
-            transformationMatrix.postTranslate(focusX + dx, focusY + dy);
-            matrix.postConcat(transformationMatrix);
+                transformationMatrix.postTranslate(-focusX, -focusY);
+                transformationMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor());
 
+                float dx = focusX - lastTouchX;
+                float dy = focusY - lastTouchY;
+
+                transformationMatrix.postTranslate(focusX + dx, focusY + dy);
+
+                matrix.postConcat(transformationMatrix);
+
+            }
             lastTouchX = focusX;
             lastTouchY = focusY;
 
