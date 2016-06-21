@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.text.InputType;
@@ -19,6 +20,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.example.benjamin.git.MySketch.R;
@@ -36,7 +38,7 @@ public class SketchActivity extends Activity{
     private static final String KEY_LAST_TOUCH = "lastTouch_key";
     private static final String KEY_MATRIX = "matrix_key";
 
-    FrameLayout mFrame;
+
     private String mCurrentProject;
     private Shapes mCurrentShape;
     private float mScaleFactor;
@@ -47,7 +49,7 @@ public class SketchActivity extends Activity{
     private int mDisplayHeight;
     private int mDisplayWidth;
     private float staticScale;
-    private RelativeLayout mFrame;
+    private FrameLayout mFrame;
     private ArrayList<Shapes> shapesList = new ArrayList<>();
     private GestureDetectorCompat gestureListener;
     private ScaleGestureDetector mScaleGestureDetector;
@@ -55,10 +57,10 @@ public class SketchActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.frame);
+        setContentView(R.layout.activity_sketch);
 
         //Frame som indeholder alle views
-        mFrame = (FrameLayout) findViewById(R.id.frameSketch);
+        mFrame = (FrameLayout) findViewById(R.id.frame);
 
         //Opsætter display størrelse
         Display display = getWindowManager().getDefaultDisplay();
@@ -68,25 +70,23 @@ public class SketchActivity extends Activity{
         mDisplayWidth = size.x;
 
         //definition på staticScale
-        staticScale = mDisplayHeight/3;
+        staticScale = mDisplayHeight / 3;
 
         //listeners
         gestureListener = new GestureDetectorCompat(this, new MyGestureListener());
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
         //button
-        final ImageButton addShape = (ImageButton) findViewById(R.id.btn_add);
-        addShape.setOnClickListener(new View.OnClickListener(){
-
+        final FloatingActionButton addShape = (FloatingActionButton) findViewById(R.id.btn_add);
+        addShape.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addDialog();
 
             }
         });
-
         //first instance of the sketchActivity only
-        if(savedInstanceState == null){
+        if (savedInstanceState == null) {
             //opsætter matrix
             matrix = new Matrix();
             matrix.reset();
@@ -97,14 +97,15 @@ public class SketchActivity extends Activity{
             //Indstiller project der arbejdes med
             mCurrentProject = getIntent().getStringExtra(MainActivity.PROJECT_NAME_KEY);
 
-        //Loader filer gemt under projectet
-        loadSavedData();
+            //Loader filer gemt under projectet
+            loadSavedData();
 
-        //Test
-        //addCircle();
+            //Test
+            //addCircle();
 
-        addDialog();
+            addDialog();
 
+        }
     }
 
     private void addDialog(){
@@ -211,17 +212,17 @@ public class SketchActivity extends Activity{
                     public void onClick(DialogInterface dialog, int which) {
                         String lengthString = length.getText().toString();
                         String widthString = width.getText().toString();
-                        float floatlen = -1.0f;
-                        float floatwid = -1.0f;
+                        float floatlen;
+                        float floatwid;
                         try {
                             floatlen = Float.parseFloat(lengthString);
                             floatwid = Float.parseFloat(widthString);
                             if(floatlen <= 0.0f || floatwid <= 0.0f){
                                 throw new NumberFormatException();
                             }
-                            Shapes temp = new Square(SketchActivity.this, mCurrentProject, true, floatwid, floatlen, 0,0);
-                            mFrame.addView(temp);
-                            shapesList.add(temp);
+                            float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
+                            makeNewSquare(newCoords[0], newCoords[1],Shapes.STROKE_WIDTH_STANDARD,floatlen*staticScale,floatwid*staticScale, true);
+
                         }
                         catch(NumberFormatException e) {
                             Toast.makeText(getApplicationContext(), "wrong input", Toast.LENGTH_SHORT).show();
