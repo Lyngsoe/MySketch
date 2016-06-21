@@ -36,6 +36,8 @@
     <string name="make_line_sub">Enter length of line and pick orientation.</string>
     <string name="make_line_hint">length</string>
 
+    <string name="invalid_input">Invalid input.</string>
+
     <string-array name="add_types">
         <item> Circle </item>
         <item> Square </item>

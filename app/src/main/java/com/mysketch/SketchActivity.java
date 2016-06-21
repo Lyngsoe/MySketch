@@ -166,7 +166,7 @@ public class SketchActivity extends Activity{
                             makeNewCircle(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale,true);
                         }
                         catch(NumberFormatException e) {
-                            Toast.makeText(getApplicationContext(), "wrong input", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -227,7 +227,7 @@ public class SketchActivity extends Activity{
 
                         }
                         catch(NumberFormatException e) {
-                            Toast.makeText(getApplicationContext(), "wrong input", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
