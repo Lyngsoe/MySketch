@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 
 public class Square extends Shapes {
@@ -22,13 +23,16 @@ public class Square extends Shapes {
     public  Square(Context context, String projectName, float x, float y, float strokeWidth, float width, float height){
         super(context, projectName, SHAPE_TYPE, x, y, strokeWidth);
 
-        mPainter.setColor(Color.BLACK);
+
         mPainter.setStyle(Paint.Style.STROKE);
         mPainter.setAntiAlias(true);
         mPainter.setStrokeWidth(strokeWidth);
 
+
         this.height = height;
         this.width = width;
+
+
 
         invalidate();
     }
@@ -38,29 +42,44 @@ public class Square extends Shapes {
 
         canvas.save();
 
-        canvas.drawRect(r,mPainter);
+        r.set(x,y,x+width,y+height);
+
+
+
         canvas.setMatrix(matrix);
+
+        canvas.drawRect(r,mPainter);
+        /*
         canvas.drawLine(x,y,x+ width,y, mPainter);
         canvas.drawLine(x,y,x,y+ height, mPainter);
         canvas.drawLine(x+ width,y+ height,x,y+ height, mPainter);
         canvas.drawLine(x+ width,y+ height,x+ width,y, mPainter);
+        */
 
         canvas.restore();
     }
 
     @Override
-    public boolean Intersects(float x, float y){
+    public void setStrokeWidthandColor(int Color, float Stroke){
+        mPainter.setColor(Color);
+        mPainter.setStrokeWidth(Stroke);
+    }
 
+    @Override
+    public boolean Intersects(float x, float y){
         RectF interRec = new RectF();
-        interRec.set(x,y,x+width,y+height);
+        interRec.set(x,y,x+STROKE_WIDTH_STANDARD,y+STROKE_WIDTH_STANDARD);
 
         return r.intersect(interRec);
+
+
 
         /*
         float xMax = this.x + strokeWidth/2;
         float xMin = xMax - strokeWidth;
         float yMax = this.y + strokeWidth/2;
         float yMin = yMax - strokeWidth;
+        */
 
         /*
         boolean[] checkFor = {
@@ -77,6 +96,7 @@ public class Square extends Shapes {
         return (checkFor[0] || checkFor[1] || checkFor[2] || checkFor[3])
         */
 
-       // return (xMin <= x && x <= xMax && yMin <= y && y <= yMax); //all figure
+        // return (xMin <= x && x <= xMax && yMin <= y && y <= yMax); //all figure
+
     }
 }

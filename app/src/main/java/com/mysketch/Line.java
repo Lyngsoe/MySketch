@@ -39,6 +39,12 @@ public class Line extends Shapes {
     }
 
     @Override
+    public void setStrokeWidthandColor(int Color, float Stroke){
+        mPainter.setColor(Color);
+        mPainter.setStrokeWidth(Stroke);
+    }
+
+    @Override
     public boolean Intersects(float px, float py) {
         float dist = (float) ( Math.abs((px-x)*(y2-y)-(py-y)*(x2-x)) / Math.hypot(x2-x, y2-x) );
         return dist <= strokeWidth;
