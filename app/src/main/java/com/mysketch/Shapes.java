@@ -1,45 +1,45 @@
 package com.mysketch;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.PointF;
-import android.view.ContextMenu;
 import android.view.View;
 
-/**
- * Created by Sean on 17-06-2016.
- */
 public abstract class Shapes extends View {
-    float mScaleFactor = 1;
-    PointF zoomPoint;
-    Matrix m;
 
-    float x;
-    float y;
-    float drawX;
-    float drawY;
+    static float STROKE_WIDTH_STANDARD = 10f;
+    static float STROKE_WIDTH_SELECTED = 25f;
+    static int COLOR_STANARD = android.graphics.Color.BLACK;
+    static int COlOR_SELECTED = android.graphics.Color.RED;
 
-    String projectName;
+    protected Matrix matrix;
+    protected float x;
+    protected float y;
+    protected float strokeWidth;
+
+
+    final String projectName;
+    final String shapeType;
     int uniqueID;
-    String shapeType;
 
-    public Shapes(Context context, String projectName, String shapeType, boolean addInstance, float x, float y){
+
+    public Shapes(Context context, String projectName, String shapeType, float x, float y, float strokeWidth){
         super(context);
         this.projectName = projectName;
         this.shapeType = shapeType;
         this.x = x;
         this.y = y;
-        if(addInstance) {
-            this.uniqueID = DataManager.getUniqueID(projectName);
-        }
+        this.strokeWidth = strokeWidth;
+
     }
 
-    public void setDraw(float x, float y){
-        this.drawX=x;
-        this.drawY=y;
+    public void Move(float dx, float dy) {
+        this.x -= dx;
+        this.y -= dy;
     }
 
-    public void setCoord(float x, float y){
+    public void setCoordinates(float x, float y) {
         this.x = x;
         this.y = y;
     }
@@ -52,38 +52,18 @@ public abstract class Shapes extends View {
         return y;
     }
 
-    public float getXCoord(){
-        return drawX;
+    public float getStrokeWidth(){
+        return strokeWidth;
     }
 
-    public float getYCoord(){
-        return drawY;
+    public abstract void setStrokeWidthandColor(int Color,float strokeWidth);
+
+    public void setMatrix(Matrix matrix){
+        this.matrix = matrix;
     }
 
-    public void setScale(float scale){
-        mScaleFactor = scale;
-    }
-
-    public void setZoomPoint(PointF zoomPoint){
-        this.zoomPoint = zoomPoint;
-    }
+    @Override
+    public abstract void onDraw(Canvas canvas);
 
     public abstract boolean Intersects(float x, float y);
-
-    public abstract void Move(float dx, float dy);
-
-    public abstract void ChangeColorAndStrokeW(int color,float strokeW);
-
-
-
-
-    public void setMatrix(Matrix m){this.m = m;}
-
-
-
-
-
-
-
-
 }
