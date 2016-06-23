@@ -38,6 +38,7 @@ public class SketchActivity extends Activity{
 
     private static final float MIN_SCALE = 0.1f;
     private static final float MAX_SCALE = 5.0f;
+    private static final float STATIC_SCALE = 500f;
 
     private String mCurrentProject;
     private Shapes mCurrentShape;
@@ -48,7 +49,6 @@ public class SketchActivity extends Activity{
 
     private int mDisplayHeight;
     private int mDisplayWidth;
-    private float staticScale;
     private FrameLayout mFrame;
     private ArrayList<Shapes> shapesList = new ArrayList<>();
     private GestureDetectorCompat gestureListener;
@@ -68,9 +68,6 @@ public class SketchActivity extends Activity{
         display.getSize(size);
         mDisplayHeight = size.y;
         mDisplayWidth = size.x;
-
-        //definition på staticScale
-        staticScale = mDisplayHeight / 3;
 
         //listeners
         gestureListener = new GestureDetectorCompat(this, new MyGestureListener());
@@ -140,7 +137,7 @@ public class SketchActivity extends Activity{
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
         input.setLayoutParams(lp);
-        input.setHint("" + ((Circle) mCurrentShape).radius/staticScale);
+        input.setHint("" + ((Circle) mCurrentShape).radius/ STATIC_SCALE);
         alertDialog.setView(input);
 
         alertDialog.setPositiveButton(R.string.default_enter,
@@ -154,7 +151,7 @@ public class SketchActivity extends Activity{
                                 throw new NumberFormatException();
                             }
 
-                            ((Circle) mCurrentShape).radius = floatin * staticScale;
+                            ((Circle) mCurrentShape).radius = floatin * STATIC_SCALE;
 
                             mCurrentShape.invalidate();
                             DataManager.saveAndOverwriteSingleShape(mCurrentShape);
@@ -185,8 +182,8 @@ public class SketchActivity extends Activity{
 
         final EditText height = new EditText(this);
         final EditText width = new EditText(this);
-        height.setHint("" + ((Square) mCurrentShape).height/staticScale);
-        width.setHint("" + ((Square) mCurrentShape).width/staticScale);
+        height.setHint("" + ((Square) mCurrentShape).height/ STATIC_SCALE);
+        width.setHint("" + ((Square) mCurrentShape).width/ STATIC_SCALE);
         //height
         height.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -214,8 +211,8 @@ public class SketchActivity extends Activity{
                             if(floathei <= 0.0f || floatwid <= 0.0f){
                                 throw new NumberFormatException();
                             }
-                            ((Square) mCurrentShape).width = floatwid * staticScale;
-                            ((Square) mCurrentShape).height = floathei * staticScale;
+                            ((Square) mCurrentShape).width = floatwid * STATIC_SCALE;
+                            ((Square) mCurrentShape).height = floathei * STATIC_SCALE;
 
                             mCurrentShape.invalidate();
                             DataManager.saveAndOverwriteSingleShape(mCurrentShape);
@@ -250,7 +247,7 @@ public class SketchActivity extends Activity{
         input.setLayoutParams(lp);
 
         boolean isVertical = (mCurrentShape.x == ((Line) mCurrentShape).x2);
-        String hint = (isVertical) ? "" + Math.abs(mCurrentShape.getY()-((Line) mCurrentShape).y2)/staticScale : "" + Math.abs(mCurrentShape.getX()-((Line) mCurrentShape).x2)/staticScale;
+        String hint = (isVertical) ? "" + Math.abs(mCurrentShape.getY()-((Line) mCurrentShape).y2)/ STATIC_SCALE : "" + Math.abs(mCurrentShape.getX()-((Line) mCurrentShape).x2)/ STATIC_SCALE;
         input.setHint(hint);
 
         alertDialog.setView(input);
@@ -265,7 +262,7 @@ public class SketchActivity extends Activity{
                             if(floatin < 0.0f){
                                 throw new NumberFormatException();
                             }
-                            float length = floatin * staticScale;
+                            float length = floatin * STATIC_SCALE;
                             boolean isVertical = (mCurrentShape.x == ((Line) mCurrentShape).x2);
                             ((Line) mCurrentShape).x2 = (isVertical) ? mCurrentShape.getX() : mCurrentShape.getX()+length;
                             ((Line) mCurrentShape).y2 = (isVertical) ? mCurrentShape.getY()+length : mCurrentShape.getY();
@@ -347,7 +344,7 @@ public class SketchActivity extends Activity{
                                 throw new NumberFormatException();
                             }
                             float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
-                            makeNewCircle(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale,true);
+                            makeNewCircle(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * STATIC_SCALE,true);
                         }
                         catch(NumberFormatException e) {
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
@@ -407,7 +404,7 @@ public class SketchActivity extends Activity{
                                 throw new NumberFormatException();
                             }
                             float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
-                            makeNewSquare(newCoords[0], newCoords[1],Shapes.STROKE_WIDTH_STANDARD,floatwid*staticScale,floathei*staticScale, true);
+                            makeNewSquare(newCoords[0], newCoords[1],Shapes.STROKE_WIDTH_STANDARD,floatwid* STATIC_SCALE,floathei* STATIC_SCALE, true);
 
                         }
                         catch(NumberFormatException e) {
@@ -451,7 +448,7 @@ public class SketchActivity extends Activity{
                                 throw new NumberFormatException();
                             }
                             float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
-                            makeNewLine(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale, true, true);
+                            makeNewLine(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * STATIC_SCALE, true, true);
                         }
                         catch(NumberFormatException e) {
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
@@ -494,7 +491,7 @@ public class SketchActivity extends Activity{
                                 throw new NumberFormatException();
                             }
                             float[] newCoords = transformCoordinate(new float[] {mDisplayWidth/2, mDisplayHeight/2});
-                            makeNewLine(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * staticScale,false,true);
+                            makeNewLine(newCoords[0], newCoords[1], Shapes.STROKE_WIDTH_STANDARD, floatin * STATIC_SCALE,false,true);
                         }
                         catch(NumberFormatException e) {
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.invalid_input), Toast.LENGTH_SHORT).show();
